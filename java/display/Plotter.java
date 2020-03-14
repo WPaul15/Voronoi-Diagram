@@ -26,7 +26,7 @@ public class Plotter
 	}
 
 	/**
-	 * Plots the points specified by {@code events}, scaled according to the spread of the points.
+	 * Plots the specified points, scaled according to the spread of the points.
 	 *
 	 * @param events The list of points to be plotted.
 	 */
@@ -42,6 +42,15 @@ public class Plotter
 		}
 	}
 
+	/**
+	 * Calculates the maximum coordinate value of the set of input points. This value is used to determine the factor by
+	 * which the displayed coordinates should be scaled.
+	 *
+	 * @param minX The minimum x-value of the input points.
+	 * @param maxX The maximum x-value of the input points.
+	 * @param minY The minimum y-value of the input points.
+	 * @param maxY The maximum y-value of the input points.
+	 */
 	public void setScale(int minX, int maxX, int minY, int maxY)
 	{
 		int maxMax = Math.max(maxX, maxY);
