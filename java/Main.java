@@ -29,7 +29,6 @@ import java.util.StringTokenizer;
  */
 public class Main extends Application
 {
-	private static final String INPUT_FILE = "sites.txt";
 	private static final int WINDOW_WIDTH = 750;
 	private static final int WINDOW_HEIGHT = 750;
 	private int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
@@ -43,11 +42,18 @@ public class Main extends Application
 	@Override
 	public void start(Stage primaryStage) throws Exception
 	{
+		List<String> parameters = getParameters().getRaw();
+
+		if (parameters.size() < 1)
+			throw new Exception("Input file must be specified");
+		else if (parameters.size() > 1)
+			throw new Exception("Error parsing program parameters");
+
 		Group root = new Group();
 		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
 		Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
 
-		List<Event> events = readInputFile(INPUT_FILE);
+		List<Event> events = readInputFile(parameters.get(0));
 
 		plotter.setScale(minX, maxX, minY, maxY);
 		plotter.plotSiteEvents(events);
