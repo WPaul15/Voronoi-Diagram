@@ -1,20 +1,16 @@
 import display.Plotter;
 import javafx.application.Application;
-import javafx.geometry.Point2D;
+import javafx.application.Platform;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
+import org.jetbrains.annotations.NotNull;
 import voronoi.Point;
 import voronoi.VoronoiDiagram;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.Event;
 
-import javax.sound.sampled.Line;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -31,8 +27,8 @@ public class Main extends Application
 {
 	private static final int WINDOW_WIDTH = 750;
 	private static final int WINDOW_HEIGHT = 750;
-	private int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
-	private int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+	private double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
+	private double minY = Double.MAX_VALUE, maxY = Double.MIN_VALUE;
 
 	public static void main(String[] args)
 	{
@@ -46,35 +42,40 @@ public class Main extends Application
 
 		if (parameters.size() < 1)
 			throw new Exception("Input file must be specified");
-		else if (parameters.size() > 1)
-			throw new Exception("Error parsing program parameters");
-
-		Group root = new Group();
-		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-		Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
 
 		List<Event> events = readInputFile(parameters.get(0));
-
-		plotter.setScale(minX, maxX, minY, maxY);
-		plotter.plotSiteEvents(events);
-		root.getChildren().add(canvas);
+		boolean display = Boolean.parseBoolean(parameters.get(1));
 
 		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(events);
 		writeOutputFile(voronoiDiagram);
 
-		primaryStage.setTitle("Voronoi Diagram");
-		primaryStage.setResizable(false);
-		primaryStage.setScene(new Scene(root));
-		primaryStage.show();
+		if (display)
+		{
+			Group root = new Group();
+			Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
+			Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
+
+			plotter.setScale(minX, maxX, minY, maxY);
+			plotter.plotSiteEvents(events);
+			root.getChildren().add(canvas);
+
+			primaryStage.setTitle("Voronoi Diagram");
+			primaryStage.setResizable(false);
+			primaryStage.setScene(new Scene(root));
+			primaryStage.show();
+		}
+		else Platform.exit();
 	}
 
 	/**
 	 * Reads the input points from the specified file, creates object representations of them, and returns a
-	 * {@code List} of the points.
+	 * {@code List} of the points. Also calculates the minimum and maximum x- and y-values of the input set for display
+	 * purposes.
 	 *
 	 * @param filePath The path to the file containing the input points.
 	 * @return A {@code List} of {@code Event}s created from the points contained in the given file.
 	 */
+	@NotNull
 	private List<Event> readInputFile(String filePath)
 	{
 		List<Event> sites = new ArrayList<>();
@@ -90,10 +91,10 @@ public class Main extends Application
 				StringTokenizer tokenizer = new StringTokenizer(line, ") (");
 
 				int i = 0;
-				int[] coordinates = new int[2];
+				double[] coordinates = new double[2];
 				while (tokenizer.hasMoreTokens())
 				{
-					coordinates[i++] = Integer.parseInt(tokenizer.nextToken().replaceAll(",", ""));
+					coordinates[i++] = Double.parseDouble(tokenizer.nextToken().replaceAll(",", ""));
 					if (i % 2 == 0)
 					{
 						sites.add(new Event(new Point(coordinates[0], coordinates[1])));
@@ -122,7 +123,7 @@ public class Main extends Application
 	 *
 	 * @param voronoi The Voronoi diagram to be written, represented as a {@code DoublyConnectedEdgeList}.
 	 */
-	private void writeOutputFile(DoublyConnectedEdgeList voronoi)
+	private void writeOutputFile(@NotNull DoublyConnectedEdgeList voronoi)
 	{
 		try
 		{

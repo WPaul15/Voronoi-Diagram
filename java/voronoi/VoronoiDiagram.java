@@ -1,9 +1,10 @@
 package voronoi;
 
-import javafx.scene.Scene;
 import voronoi.dcel.DoublyConnectedEdgeList;
+import voronoi.queue.CircleEvent;
 import voronoi.queue.Event;
 import voronoi.queue.EventQueue;
+import voronoi.tree.LeafNode;
 import voronoi.tree.StatusTree;
 import voronoi.tree.TreeNode;
 
@@ -18,8 +19,10 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	private EventQueue queue;
 	private StatusTree status;
 
+	private static double sweepLinePos = Double.MIN_VALUE;
+
 	/**
-	 * Constructs a Voronoi diagram from the given set of sites using Fortune's sweep line algorithm.
+	 * Constructs a Voronoi diagram from the given set of sites using Steven Fortune's line sweep algorithm.
 	 *
 	 * @param sites The list of sites for which to construct a Voronoi diagram.
 	 */
@@ -28,47 +31,59 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		queue = new EventQueue(sites);
 		status = new StatusTree();
 
-		//System.out.println(voronoi.queue);
+		createVoronoiDiagram();
+	}
 
+	public static double getSweepLinePos()
+	{
+		return sweepLinePos;
+	}
+
+	private void createVoronoiDiagram()
+	{
 		while (!queue.isEmpty())
 		{
 			System.out.println(queue);
 			Event event = queue.poll();
 			assert event != null;
+			sweepLinePos = event.getCoordinates().getY();
 			if (event.getClass() == Event.class)
-				handleSiteEvent(event);// TODO Implement
+				handleSiteEvent(event);
 			else
-				handleCircleEvent();// TODO Implement
+				handleCircleEvent();
 			System.out.println(status);
 		}
 
 		// TODO Compute bounding box and update DCEL
 	}
 
+	// TODO Implement
 	private void handleSiteEvent(Event event)
 	{
-		/* If the status voronoi.tree is empty, insert the arc given by the event */
+		/* If the status tree is empty, insert the arc given by the event */
 		if (status.isEmpty())
 		{
-			Point arc = event.getCoordinates();
-			status.put(arc.getX(), new TreeNode(arc));
+			status.put(new LeafNode(event.getCoordinates()), null);
 			return;
 		}
 
 		/* Retrieve the arc directly above the new event */
-		Map.Entry<Integer, TreeNode> entry = status.floorEntry(event.getCoordinates().getX());
+		Map.Entry<TreeNode, CircleEvent> entry = status.floorEntry(new LeafNode(event.getCoordinates()));
+		TreeNode arc = entry.getKey();
+		CircleEvent circleEvent = entry.getValue();
 
 		/* Remove false circle event if it exists */
-		if (entry != null) queue.remove(entry.getValue().getCircleEvent());
+		if (circleEvent != null) queue.remove(circleEvent);
 
-		assert entry != null;
-		TreeNode arc = entry.getValue();
-		System.out.println("Arc Above " + event.toString() + ":\t" + arc.getArc().toString());
+//		assert arc != null;
+//		LeafNode l = (LeafNode) arc;
+//		System.out.println("Arc Above " + event.toString() + ":\t" + l.getArc().toString());
 
-		/* Replace the leaf from the status voronoi.tree with a new subtree */
-		//status.remove(entry.getKey());
+		/* Replace the leaf from the status tree with a new subtree */
+//		status.remove(entry.getKey());
 	}
 
+	// TODO Implement
 	private void handleCircleEvent()
 	{
 

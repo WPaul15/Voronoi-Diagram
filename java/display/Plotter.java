@@ -15,7 +15,7 @@ public class Plotter
 	private double windowWidth;
 	private double windowHeight;
 	private GraphicsContext graphicsContext;
-	private int scale;
+	private double scale;
 
 	public Plotter(double windowWidth, double windowHeight, GraphicsContext graphicsContext)
 	{
@@ -51,14 +51,14 @@ public class Plotter
 	 * @param minY The minimum y-value of the input points.
 	 * @param maxY The maximum y-value of the input points.
 	 */
-	public void setScale(int minX, int maxX, int minY, int maxY)
+	public void setScale(double minX, double maxX, double minY, double maxY)
 	{
-		int maxMax = Math.max(maxX, maxY);
-		int maxMin = Math.max(Math.abs(minX), Math.abs(minY));
+		double maxMax = Math.max(maxX, maxY);
+		double maxMin = Math.max(Math.abs(minX), Math.abs(minY));
 		this.scale = Math.max(maxMax, maxMin);
 	}
 
-	private Point2D scalePoint(int x, int y, double factor)
+	private Point2D scalePoint(double x, double y, double factor)
 	{
 		return new Point2D((factor * x) + (windowWidth / 2.0), (-factor * y) + (windowHeight / 2.0));
 	}

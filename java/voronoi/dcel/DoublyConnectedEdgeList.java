@@ -19,15 +19,16 @@ public class DoublyConnectedEdgeList
 		this.faces = new ArrayList<>();
 	}
 
+	// TODO Implement
 	public void computeBoundingBox()
 	{
-		int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
-		int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+		double minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
+		double minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
 		for (DCELVertex v : vertices)
 		{
-			int x = v.getCoordinates().getX();
-			int y = v.getCoordinates().getY();
+			double x = v.getCoordinates().getX();
+			double y = v.getCoordinates().getY();
 
 			if (x < minX) minX = x;
 			else if (x > maxX) maxX = x;
@@ -36,10 +37,10 @@ public class DoublyConnectedEdgeList
 			else if (y > maxY) maxY = y;
 		}
 
-//		DCELVertex b1 = new DCELVertex(1, DCELVertex.VertexType.BOUNDING_VERTEX, new voronoi.Point(minX - 5, minY - 5)); //Lower left
-//		DCELVertex b2 = new DCELVertex(2, DCELVertex.VertexType.BOUNDING_VERTEX, new voronoi.Point(maxX + 5, minY - 5)); //Lower right
-//		DCELVertex b3 = new DCELVertex(3, DCELVertex.VertexType.BOUNDING_VERTEX, new voronoi.Point(maxX + 5, maxY + 5)); //Upper right
-//		DCELVertex b4 = new DCELVertex(4, DCELVertex.VertexType.BOUNDING_VERTEX, new voronoi.Point(minX - 5, maxY + 5)); //Upper left
+//		DCELVertex b1 = new DCELVertex(1, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(minX - 5, minY - 5)); //Lower left
+//		DCELVertex b2 = new DCELVertex(2, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(maxX + 5, minY - 5)); //Lower right
+//		DCELVertex b3 = new DCELVertex(3, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(maxX + 5, maxY + 5)); //Upper right
+//		DCELVertex b4 = new DCELVertex(4, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(minX - 5, maxY + 5)); //Upper left
 //
 //		DCELEdge e1 = new DCELEdge(b1, null);
 	}

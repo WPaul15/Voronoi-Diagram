@@ -1,12 +1,14 @@
 package voronoi.tree;
 
+import voronoi.queue.CircleEvent;
+
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * @author Willem Paul
  */
-public class StatusTree extends TreeMap<Integer, TreeNode>
+public class StatusTree extends TreeMap<TreeNode, CircleEvent>
 {
 	public StatusTree()
 	{
@@ -19,7 +21,7 @@ public class StatusTree extends TreeMap<Integer, TreeNode>
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("Status Tree:\t[");
-		for (Map.Entry<Integer, TreeNode> node : this.entrySet())
+		for (Map.Entry<TreeNode, CircleEvent> node : this.entrySet())
 		{
 			builder.append(node.getKey()).append(" => ").append(node.getValue());
 			builder.append(", ");
