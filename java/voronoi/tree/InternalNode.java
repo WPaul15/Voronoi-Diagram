@@ -11,6 +11,8 @@ public class InternalNode extends TreeNode
 {
 	private Point leftArc, rightArc;
 	private DCELEdge tracedEdge;
+	private double cachedSweepLinePos;
+	private Point cachedBreakpoint;
 
 	public InternalNode(Point leftArc, Point rightArc, DCELEdge tracedEdge)
 	{
@@ -22,25 +24,29 @@ public class InternalNode extends TreeNode
 	@Override
 	protected Point getPoint()
 	{
-		double sweepLinePos = VoronoiDiagram.getSweepLinePos();
+		/* If the sweep line is at the same position, there's no need to recalculate the breakpoint */
+		if (VoronoiDiagram.getSweepLinePos() == cachedSweepLinePos)
+			return cachedBreakpoint;
+
+		cachedSweepLinePos = VoronoiDiagram.getSweepLinePos();
 
 		/* Calculate left parabola */
 		double x = leftArc.getX();
 		double y = leftArc.getY();
-		double denominator = (2 * (y - sweepLinePos));
+		double denominator = (2 * (y - cachedSweepLinePos));
 
 		double a1 = 1 / denominator;
 		double b1 = (-2 * x) / denominator;
-		double c1 = (x * x + y * y - sweepLinePos * sweepLinePos) / denominator;
+		double c1 = (x * x + y * y - cachedSweepLinePos * cachedSweepLinePos) / denominator;
 
 		/* Calculate right parabola */
 		x = rightArc.getX();
 		y = rightArc.getY();
-		denominator = (2 * (y - sweepLinePos));
+		denominator = (2 * (y - cachedSweepLinePos));
 
 		double a2 = 1 / denominator;
 		double b2 = (-2 * x) / denominator;
-		double c2 = (x * x + y * y - sweepLinePos * sweepLinePos) / denominator;
+		double c2 = (x * x + y * y - cachedSweepLinePos * cachedSweepLinePos) / denominator;
 
 		/* Calculate intersection point */
 		double a = a1 - a2;
@@ -55,7 +61,8 @@ public class InternalNode extends TreeNode
 		if (discriminant <= 0) breakpointX = -b / (2 * a);
 		else breakpointX = (-b + sign * Math.sqrt(discriminant)) / (2 * a);
 
-		return new Point(breakpointX, 0);
+		cachedBreakpoint = new Point(breakpointX, 0);
+		return cachedBreakpoint;
 	}
 
 	public Point getLeftArc()
