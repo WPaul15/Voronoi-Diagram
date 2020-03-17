@@ -55,8 +55,7 @@ public class Main extends Application
 			Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
 			Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
 
-			plotter.setScale(minX, maxX, minY, maxY);
-			plotter.plotSiteEvents(events);
+			plotter.plotSiteEvents(events, minX, maxX, minY, maxY);
 			root.getChildren().add(canvas);
 
 			primaryStage.setTitle("Voronoi Diagram");

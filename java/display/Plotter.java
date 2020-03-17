@@ -30,28 +30,21 @@ public class Plotter
 	 *
 	 * @param events The list of points to be plotted.
 	 */
-	public void plotSiteEvents(List<Event> events)
+	public void plotSiteEvents(List<Event> events, double minX, double maxX, double minY, double maxY)
 	{
+		if (scale == 1) setScale(minX, maxX, minY, maxY);
+
 		graphicsContext.setFill(Color.RED);
 
 		for (Event event : events)
 		{
 			double factor = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / scale;
 			Point2D scaledPoint = scalePoint(event.getCoordinates().getX(), event.getCoordinates().getY(), factor);
-			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(),5, 5);
+			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
 		}
 	}
 
-	/**
-	 * Calculates the maximum coordinate value of the set of input points. This value is used to determine the factor by
-	 * which the displayed coordinates should be scaled.
-	 *
-	 * @param minX The minimum x-value of the input points.
-	 * @param maxX The maximum x-value of the input points.
-	 * @param minY The minimum y-value of the input points.
-	 * @param maxY The maximum y-value of the input points.
-	 */
-	public void setScale(double minX, double maxX, double minY, double maxY)
+	private void setScale(double minX, double maxX, double minY, double maxY)
 	{
 		double maxMax = Math.max(maxX, maxY);
 		double maxMin = Math.max(Math.abs(minX), Math.abs(minY));
