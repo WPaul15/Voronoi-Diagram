@@ -19,34 +19,48 @@ public class InternalNode extends TreeNode
 		this.leftArc = leftArc;
 		this.rightArc = rightArc;
 		this.tracedEdge = tracedEdge;
+		cachedSweepLinePos = Double.MIN_VALUE;
 	}
 
 	@Override
 	protected Point getPoint()
 	{
 		/* If the sweep line is at the same position, there's no need to recalculate the breakpoint */
-		if (VoronoiDiagram.getSweepLinePos() == cachedSweepLinePos)
+		double currentSweepLinePos = VoronoiDiagram.getSweepLinePos();
+		if (currentSweepLinePos == cachedSweepLinePos)
 			return cachedBreakpoint;
 
-		cachedSweepLinePos = VoronoiDiagram.getSweepLinePos();
+		cachedSweepLinePos = currentSweepLinePos;
+
+		/* Handle new site point case (degenerate parabola) */
+		if (leftArc.getY() == currentSweepLinePos)
+		{
+			cachedBreakpoint = new Point(leftArc.getX(), 0);
+			return cachedBreakpoint;
+		}
+		else if (rightArc.getY() == currentSweepLinePos)
+		{
+			cachedBreakpoint = new Point(rightArc.getX(), 0);
+			return cachedBreakpoint;
+		}
 
 		/* Calculate left parabola */
 		double x = leftArc.getX();
 		double y = leftArc.getY();
-		double denominator = (2 * (y - cachedSweepLinePos));
+		double denominator = (2 * (y - currentSweepLinePos));
 
 		double a1 = 1 / denominator;
 		double b1 = (-2 * x) / denominator;
-		double c1 = (x * x + y * y - cachedSweepLinePos * cachedSweepLinePos) / denominator;
+		double c1 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
 
 		/* Calculate right parabola */
 		x = rightArc.getX();
 		y = rightArc.getY();
-		denominator = (2 * (y - cachedSweepLinePos));
+		denominator = (2 * (y - currentSweepLinePos));
 
 		double a2 = 1 / denominator;
 		double b2 = (-2 * x) / denominator;
-		double c2 = (x * x + y * y - cachedSweepLinePos * cachedSweepLinePos) / denominator;
+		double c2 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
 
 		/* Calculate intersection point */
 		double a = a1 - a2;
