@@ -4,9 +4,9 @@ import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.CircleEvent;
 import voronoi.queue.Event;
 import voronoi.queue.EventQueue;
-import voronoi.tree.LeafNode;
+import voronoi.tree.Arc;
+import voronoi.tree.Breakpoint;
 import voronoi.tree.StatusTree;
-import voronoi.tree.TreeNode;
 
 import java.util.List;
 import java.util.Map;
@@ -63,29 +63,50 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		/* If the status tree is empty, insert the arc given by the event */
 		if (status.isEmpty())
 		{
-			status.put(new LeafNode(event.getCoordinates()), null);
+			status.put(new Arc(event.getCoordinates()), null);
 			return;
 		}
 
 		/* Retrieve the arc directly above the new event */
-		Map.Entry<TreeNode, CircleEvent> entry = status.floorEntry(new LeafNode(event.getCoordinates()));
-		TreeNode arc = entry.getKey();
-		CircleEvent circleEvent = entry.getValue();
+		Map.Entry<Arc, CircleEvent> entryAbove = status.floorEntry(new Arc(event.getCoordinates()));
+		Arc alpha = entryAbove.getKey();
+		CircleEvent circleEvent = entryAbove.getValue();
 
 		/* Remove false circle event if it exists */
 		if (circleEvent != null) queue.remove(circleEvent);
 
-//		assert arc != null;
-//		LeafNode l = (LeafNode) arc;
-//		System.out.println("Arc Above " + event.toString() + ":\t" + l.getArc().toString());
+		System.out.println("Arc Above " + event.toString() + ":\t" + alpha.getSite().toString());
 
 		/* Replace the leaf from the status tree with a new subtree */
-//		status.remove(entry.getKey());
+		status.remove(alpha);
+
+		// TODO Create DCEL edges
+		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), null);
+		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), null);
+
+		Arc leftArc = new Arc(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
+		Arc rightArc = new Arc(alpha.getSite(), newRightBreakpoint, alpha.getRightBreakpoint());
+
+		status.put(leftArc, null);
+		status.put(new Arc(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint), null);
+		status.put(rightArc, null);
+
+		checkForCircleEvent(leftArc);
+		checkForCircleEvent(rightArc);
 	}
 
 	// TODO Implement
 	private void handleCircleEvent()
 	{
 
+	}
+
+	private void checkForCircleEvent(Arc arc)
+	{
+		/* If the arc has no left or right neighbors, there can be no circle event */
+		if (arc.getLeftBreakpoint() == null || arc.getRightBreakpoint() == null) return;
+
+		Arc leftNeighbor = status.floorKey(arc);
+		Arc rightNeighbor = status.ceilingKey(arc);
 	}
 }

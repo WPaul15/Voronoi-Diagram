@@ -1,24 +1,24 @@
 package voronoi.queue;
 
 import voronoi.Point;
-import voronoi.tree.TreeNode;
+import voronoi.tree.Arc;
 
 public class CircleEvent extends Event
 {
-	private TreeNode arc;
+	private Arc arc;
 
-	public CircleEvent(Point coordinates, TreeNode arc)
+	public CircleEvent(Point coordinates, Arc arc)
 	{
 		super(coordinates);
 		this.arc = arc;
 	}
 
-	public TreeNode getArc()
+	public Arc getArc()
 	{
 		return arc;
 	}
 
-	public void setArc(TreeNode arc)
+	public void setArc(Arc arc)
 	{
 		this.arc = arc;
 	}

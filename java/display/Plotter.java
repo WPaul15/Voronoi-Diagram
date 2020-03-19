@@ -35,10 +35,10 @@ public class Plotter
 		if (scale == 1) setScale(minX, maxX, minY, maxY);
 
 		graphicsContext.setFill(Color.RED);
+		double factor = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / scale;
 
 		for (Event event : events)
 		{
-			double factor = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / scale;
 			Point2D scaledPoint = scalePoint(event.getCoordinates().getX(), event.getCoordinates().getY(), factor);
 			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
 		}

@@ -14,6 +14,7 @@ public class DCELEdge
 
 	public DCELEdge(DCELVertex origin, DCELFace incidentFace)
 	{
+		this.name = "";
 		this.origin = origin;
 		this.twin = null;
 		this.incidentFace = incidentFace;
@@ -23,7 +24,9 @@ public class DCELEdge
 
 	public String getName()
 	{
-		return "e" + origin.getIndex() + "," + twin.getOrigin().getIndex();
+		if (name.equals(""))
+			name = "e" + origin.getIndex() + "," + twin.getOrigin().getIndex();
+		return name;
 	}
 
 	public DCELVertex getOrigin()

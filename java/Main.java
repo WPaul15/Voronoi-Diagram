@@ -5,7 +5,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import voronoi.Point;
 import voronoi.VoronoiDiagram;
 import voronoi.dcel.DoublyConnectedEdgeList;
@@ -74,7 +73,7 @@ public class Main extends Application
 	 * @param filePath The path to the file containing the input points.
 	 * @return A {@code List} of {@code Event}s created from the points contained in the given file.
 	 */
-	@NotNull
+	// TODO Filter out duplicate site points
 	private List<Event> readInputFile(String filePath)
 	{
 		List<Event> sites = new ArrayList<>();
@@ -122,7 +121,7 @@ public class Main extends Application
 	 *
 	 * @param voronoi The Voronoi diagram to be written, represented as a {@code DoublyConnectedEdgeList}.
 	 */
-	private void writeOutputFile(@NotNull DoublyConnectedEdgeList voronoi)
+	private void writeOutputFile(DoublyConnectedEdgeList voronoi)
 	{
 		try
 		{

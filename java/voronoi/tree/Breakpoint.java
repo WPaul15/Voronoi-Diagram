@@ -7,27 +7,33 @@ import voronoi.dcel.DCELEdge;
 /**
  * @author Willem Paul
  */
-public class InternalNode extends TreeNode
+public class Breakpoint
 {
 	private Point leftArc, rightArc;
 	private DCELEdge tracedEdge;
 	private double cachedSweepLinePos;
 	private Point cachedBreakpoint;
 
-	public InternalNode(Point leftArc, Point rightArc, DCELEdge tracedEdge)
+	public Breakpoint(Point leftArc, Point rightArc, DCELEdge tracedEdge)
 	{
 		this.leftArc = leftArc;
 		this.rightArc = rightArc;
 		this.tracedEdge = tracedEdge;
 		cachedSweepLinePos = Double.MIN_VALUE;
+		cachedBreakpoint = null;
 	}
 
-	@Override
-	protected Point getPoint()
+	/**
+	 * Calculates the x-coordinate of the breakpoint. All {@code Point} objects returned by this method have a
+	 * y-coordinate of 0, as the y-coordinate is irrelevant to searching the status tree.
+	 *
+	 * @return A {@code Point} representing the x-coordinate of the breakpoint.
+	 */
+	public Point getCoordinates()
 	{
 		/* If the sweep line is at the same position, there's no need to recalculate the breakpoint */
 		double currentSweepLinePos = VoronoiDiagram.getSweepLinePos();
-		if (currentSweepLinePos == cachedSweepLinePos)
+		if (currentSweepLinePos == cachedSweepLinePos && cachedBreakpoint != null)
 			return cachedBreakpoint;
 
 		cachedSweepLinePos = currentSweepLinePos;
@@ -92,11 +98,5 @@ public class InternalNode extends TreeNode
 	public DCELEdge getTracedEdge()
 	{
 		return tracedEdge;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "[" + leftArc.toString() + ", " + rightArc.toString() + "]";
 	}
 }
