@@ -26,7 +26,7 @@ public class Plotter
 	}
 
 	/**
-	 * Plots the specified points, scaled according to the spread of the points.
+	 * Plots the site points, scaled according to the spread of the points.
 	 *
 	 * @param events The list of points to be plotted.
 	 */

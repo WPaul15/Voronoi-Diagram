@@ -82,17 +82,21 @@ public class DoublyConnectedEdgeList
 
 		for (DCELVertex v : vertices)
 		{
-			builder.append(v.toString()).append("\n\n");
+			builder.append(v.toString()).append("\n");
 		}
+
+		builder.append("\n\n");
 
 		for (DCELFace f : faces)
 		{
-			builder.append(f.toString()).append("\n\n");
+			builder.append(f.toString()).append("\n");
 		}
+
+		builder.append("\n\n");
 
 		for (DCELEdge e : edges)
 		{
-			builder.append(e.toString()).append("\n\n");
+			builder.append(e.toString()).append("\n");
 		}
 
 		return builder.toString();

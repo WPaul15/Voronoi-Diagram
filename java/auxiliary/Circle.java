@@ -18,4 +18,9 @@ public class Circle
 	{
 		return new Point(center.getX(), center.getY() - radius);
 	}
+
+	public Point getCenter()
+	{
+		return center;
+	}
 }

@@ -13,22 +13,24 @@ public class DCELVertex
 		BOUNDING_VERTEX
 	}
 
+	private static int vertexIndex = 0;
+
 	private int index;
 	private VertexType type;
 	private Point coordinates;
 	private DCELEdge incidentEdge;
 
-	public DCELVertex(int index, Point coordinates, DCELEdge incidentEdge)
+	public DCELVertex(Point coordinates, DCELEdge incidentEdge)
 	{
-		this.index = index;
+		this.index = ++vertexIndex;
 		this.type = VertexType.VORONOI_VERTEX;
 		this.coordinates = coordinates;
 		this.incidentEdge = incidentEdge;
 	}
 
-	public DCELVertex(int index, VertexType type, Point coordinates)
+	public DCELVertex(VertexType type, Point coordinates)
 	{
-		this.index = index;
+		this.index = ++vertexIndex;
 		this.type = type;
 		this.coordinates = coordinates;
 		this.incidentEdge = null;
@@ -63,6 +65,6 @@ public class DCELVertex
 	@Override
 	public String toString()
 	{
-		return getName() + "  " + coordinates.toString() + "  " + incidentEdge.toString();
+		return getName() + "  " + coordinates.toString();// + "  " + incidentEdge.toString();
 	}
 }

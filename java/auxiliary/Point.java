@@ -1,5 +1,9 @@
 package auxiliary;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
  * @author Willem Paul
  */
@@ -33,6 +37,9 @@ public class Point implements Comparable<Point>
 	@Override
 	public String toString()
 	{
-		return "(" + x + ", " + y + ")";
+		NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+		DecimalFormat decimalFormat = (DecimalFormat) numberFormat;
+		decimalFormat.applyPattern("###,###.####");
+		return "(" + decimalFormat.format(x) + ", " + decimalFormat.format(y) + ")";
 	}
 }

@@ -3,25 +3,26 @@ package voronoi;
 import auxiliary.Circle;
 import auxiliary.MathOps;
 import auxiliary.Point;
+import voronoi.dcel.DCELVertex;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.CircleEvent;
 import voronoi.queue.Event;
-import voronoi.queue.EventQueue;
 import voronoi.tree.ArcSegment;
 import voronoi.tree.Breakpoint;
-import voronoi.tree.StatusTree;
 import voronoi.tree.TreeQuery;
 
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 /**
  * @author Willem Paul
  */
 public class VoronoiDiagram extends DoublyConnectedEdgeList
 {
-	private EventQueue queue;
-	private StatusTree status;
+	private PriorityQueue<Event> queue;
+	private TreeMap<ArcSegment, CircleEvent> status;
 
 	private static double sweepLinePos = Double.MIN_VALUE;
 
@@ -32,8 +33,8 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	 */
 	public VoronoiDiagram(List<Event> sites)
 	{
-		queue = new EventQueue(sites);
-		status = new StatusTree();
+		queue = new PriorityQueue<>(sites);
+		status = new TreeMap<>();
 
 		createVoronoiDiagram();
 	}
@@ -47,15 +48,12 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	{
 		while (!queue.isEmpty())
 		{
-			System.out.println(queue);
 			Event event = queue.poll();
-			assert event != null;
 			sweepLinePos = event.getCoordinates().getY();
 			if (event.getClass() == Event.class)
 				handleSiteEvent(event);
 			else
-				handleCircleEvent();
-			System.out.println(status);
+				handleCircleEvent((CircleEvent) event);
 		}
 
 		// TODO Compute bounding box and update DCEL
@@ -78,14 +76,15 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		/* Remove false circle event if it exists */
 		if (circleEvent != null) queue.remove(circleEvent);
 
-		System.out.println("Arc Above " + event.toString() + ":\t" + alpha.getSite().toString());
-
 		/* Replace the leaf from the status tree with a new subtree */
 		status.remove(alpha);
 
 		// TODO Create DCEL edges
 //		DCELEdge leftEdge = new DCELEdge();
 //		DCELEdge rightEdge = new DCELEdge();
+
+//		this.getEdges().add(leftEdge);
+//		this.getEdges().add(rightEdge);
 
 		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), null);
 		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), null);
@@ -104,9 +103,20 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	}
 
 	// TODO Implement
-	private void handleCircleEvent()
+	private void handleCircleEvent(CircleEvent event)
 	{
+		ArcSegment alpha = event.getDisappearingArcSegment();
 
+		/* Remove the arc segment from the status tree */
+		status.remove(alpha);
+
+		/* Delete any other circle events involving alpha */
+
+
+		// TODO Associate the vertex with an edge
+		/* Add a new Voronoi vertex */
+		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), null);
+		this.getVertices().add(vertex);
 	}
 
 	private void checkForCircleEvent(ArcSegment arcSegment)
@@ -123,7 +133,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		if (MathOps.crossProduct(p1, p2, p3) < 0)
 		{
 			Circle circle = MathOps.circle(p1, p2, p3);
-			CircleEvent circleEvent = new CircleEvent(circle.getBottomPoint(), arcSegment);
+			CircleEvent circleEvent = new CircleEvent(circle, arcSegment);
 
 			/* Add the circle event to the queue and update the pointer in the status tree */
 			queue.add(circleEvent);
