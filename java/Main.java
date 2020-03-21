@@ -1,3 +1,4 @@
+import auxiliary.Point;
 import display.Plotter;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -5,7 +6,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
-import voronoi.Point;
 import voronoi.VoronoiDiagram;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.Event;

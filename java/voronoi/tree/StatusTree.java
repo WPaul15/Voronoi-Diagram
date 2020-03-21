@@ -8,7 +8,7 @@ import java.util.TreeMap;
 /**
  * @author Willem Paul
  */
-public class StatusTree extends TreeMap<Arc, CircleEvent>
+public class StatusTree extends TreeMap<ArcSegment, CircleEvent>
 {
 	public StatusTree()
 	{
@@ -21,7 +21,7 @@ public class StatusTree extends TreeMap<Arc, CircleEvent>
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("Status Tree:\t[");
-		for (Map.Entry<Arc, CircleEvent> node : this.entrySet())
+		for (Map.Entry<ArcSegment, CircleEvent> node : this.entrySet())
 		{
 			builder.append(node.getKey()).append(" => ").append(node.getValue());
 			builder.append(", ");

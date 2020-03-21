@@ -1,6 +1,6 @@
 package voronoi.tree;
 
-import voronoi.Point;
+import auxiliary.Point;
 import voronoi.VoronoiDiagram;
 import voronoi.dcel.DCELEdge;
 
@@ -9,15 +9,15 @@ import voronoi.dcel.DCELEdge;
  */
 public class Breakpoint
 {
-	private Point leftArc, rightArc;
+	private Point leftArcSegment, rightArcSegment;
 	private DCELEdge tracedEdge;
 	private double cachedSweepLinePos;
 	private Point cachedBreakpoint;
 
-	public Breakpoint(Point leftArc, Point rightArc, DCELEdge tracedEdge)
+	public Breakpoint(Point leftArcSegment, Point rightArcSegment, DCELEdge tracedEdge)
 	{
-		this.leftArc = leftArc;
-		this.rightArc = rightArc;
+		this.leftArcSegment = leftArcSegment;
+		this.rightArcSegment = rightArcSegment;
 		this.tracedEdge = tracedEdge;
 		cachedSweepLinePos = Double.MIN_VALUE;
 		cachedBreakpoint = null;
@@ -39,20 +39,20 @@ public class Breakpoint
 		cachedSweepLinePos = currentSweepLinePos;
 
 		/* Handle new site point case (degenerate parabola) */
-		if (leftArc.getY() == currentSweepLinePos)
+		if (leftArcSegment.getY() == currentSweepLinePos)
 		{
-			cachedBreakpoint = new Point(leftArc.getX(), 0);
+			cachedBreakpoint = new Point(leftArcSegment.getX(), 0);
 			return cachedBreakpoint;
 		}
-		else if (rightArc.getY() == currentSweepLinePos)
+		else if (rightArcSegment.getY() == currentSweepLinePos)
 		{
-			cachedBreakpoint = new Point(rightArc.getX(), 0);
+			cachedBreakpoint = new Point(rightArcSegment.getX(), 0);
 			return cachedBreakpoint;
 		}
 
 		/* Calculate left parabola */
-		double x = leftArc.getX();
-		double y = leftArc.getY();
+		double x = leftArcSegment.getX();
+		double y = leftArcSegment.getY();
 		double denominator = (2 * (y - currentSweepLinePos));
 
 		double a1 = 1 / denominator;
@@ -60,8 +60,8 @@ public class Breakpoint
 		double c1 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
 
 		/* Calculate right parabola */
-		x = rightArc.getX();
-		y = rightArc.getY();
+		x = rightArcSegment.getX();
+		y = rightArcSegment.getY();
 		denominator = (2 * (y - currentSweepLinePos));
 
 		double a2 = 1 / denominator;
@@ -73,7 +73,7 @@ public class Breakpoint
 		double b = b1 - b2;
 		double c = c1 - c2;
 
-		int sign = leftArc.getY() > rightArc.getY() ? -1 : 1;
+		int sign = leftArcSegment.getY() > rightArcSegment.getY() ? -1 : 1;
 		double discriminant = b * b - 4 * a * c;
 		double breakpointX;
 
@@ -85,14 +85,14 @@ public class Breakpoint
 		return cachedBreakpoint;
 	}
 
-	public Point getLeftArc()
+	public Point getLeftArcSegment()
 	{
-		return leftArc;
+		return leftArcSegment;
 	}
 
-	public Point getRightArc()
+	public Point getRightArcSegment()
 	{
-		return rightArc;
+		return rightArcSegment;
 	}
 
 	public DCELEdge getTracedEdge()

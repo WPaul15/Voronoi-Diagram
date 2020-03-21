@@ -1,6 +1,6 @@
 package voronoi.queue;
 
-import voronoi.Point;
+import auxiliary.Point;
 
 /**
  * @author Willem Paul

@@ -1,26 +1,26 @@
 package voronoi.queue;
 
-import voronoi.Point;
-import voronoi.tree.Arc;
+import auxiliary.Point;
+import voronoi.tree.ArcSegment;
 
 public class CircleEvent extends Event
 {
-	private Arc arc;
+	private ArcSegment disappearingArcSegment;
 
-	public CircleEvent(Point coordinates, Arc arc)
+	public CircleEvent(Point coordinates, ArcSegment disappearingArcSegment)
 	{
 		super(coordinates);
-		this.arc = arc;
+		this.disappearingArcSegment = disappearingArcSegment;
 	}
 
-	public Arc getArc()
+	public ArcSegment getDisappearingArcSegment()
 	{
-		return arc;
+		return disappearingArcSegment;
 	}
 
-	public void setArc(Arc arc)
+	public void setDisappearingArcSegment(ArcSegment disappearingArcSegment)
 	{
-		this.arc = arc;
+		this.disappearingArcSegment = disappearingArcSegment;
 	}
 
 	@Override

@@ -1,23 +1,24 @@
 package voronoi.tree;
 
-import voronoi.Point;
+import auxiliary.MathOps;
+import auxiliary.Point;
 
 /**
  * @author Willem Paul
  */
-public class Arc implements Comparable<Arc>
+public class ArcSegment implements Comparable<ArcSegment>
 {
 	private Point site;
 	private Breakpoint leftBreakpoint, rightBreakpoint;
 
-	public Arc(Point site)
+	public ArcSegment(Point site)
 	{
 		this.site = site;
 		this.leftBreakpoint = null;
 		this.rightBreakpoint = null;
 	}
 
-	public Arc(Point site, Breakpoint leftBreakpoint, Breakpoint rightBreakpoint)
+	public ArcSegment(Point site, Breakpoint leftBreakpoint, Breakpoint rightBreakpoint)
 	{
 		if (leftBreakpoint == null && rightBreakpoint == null)
 			throw new IllegalArgumentException("At least one breakpoint must be defined.");
@@ -42,7 +43,7 @@ public class Arc implements Comparable<Arc>
 	}
 
 	@Override
-	public int compareTo(Arc compareTo)
+	public int compareTo(ArcSegment compareTo)
 	{
 		Point thisLeft = this.getLeft();
 		Point thisRight = this.getRight();
@@ -64,7 +65,7 @@ public class Arc implements Comparable<Arc>
 			return -1;
 
 		/* Handle the case when a site event appears directly below a breakpoint */
-		return Point.midpoint(thisLeft, thisRight).compareTo(Point.midpoint(compareToLeft, compareToRight));
+		return MathOps.midpoint(thisLeft, thisRight).compareTo(MathOps.midpoint(compareToLeft, compareToRight));
 	}
 
 	@Override

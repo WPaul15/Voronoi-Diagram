@@ -1,11 +1,11 @@
 package voronoi.tree;
 
-import voronoi.Point;
+import auxiliary.Point;
 
 /**
  * @author Willem Paul
  */
-public class TreeQuery extends Arc
+public class TreeQuery extends ArcSegment
 {
 	private Point site;
 

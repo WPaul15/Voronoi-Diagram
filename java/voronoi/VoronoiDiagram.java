@@ -1,10 +1,13 @@
 package voronoi;
 
+import auxiliary.Circle;
+import auxiliary.MathOps;
+import auxiliary.Point;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.CircleEvent;
 import voronoi.queue.Event;
 import voronoi.queue.EventQueue;
-import voronoi.tree.Arc;
+import voronoi.tree.ArcSegment;
 import voronoi.tree.Breakpoint;
 import voronoi.tree.StatusTree;
 import voronoi.tree.TreeQuery;
@@ -58,19 +61,18 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		// TODO Compute bounding box and update DCEL
 	}
 
-	// TODO Implement
 	private void handleSiteEvent(Event event)
 	{
 		/* If the status tree is empty, insert the arc given by the event */
 		if (status.isEmpty())
 		{
-			status.put(new Arc(event.getCoordinates()), null);
+			status.put(new ArcSegment(event.getCoordinates()), null);
 			return;
 		}
 
 		/* Retrieve the arc directly above the new event */
-		Map.Entry<Arc, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event.getCoordinates()));
-		Arc alpha = entryAbove.getKey();
+		Map.Entry<ArcSegment, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event.getCoordinates()));
+		ArcSegment alpha = entryAbove.getKey();
 		CircleEvent circleEvent = entryAbove.getValue();
 
 		/* Remove false circle event if it exists */
@@ -82,20 +84,23 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		status.remove(alpha);
 
 		// TODO Create DCEL edges
+//		DCELEdge leftEdge = new DCELEdge();
+//		DCELEdge rightEdge = new DCELEdge();
+
 		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), null);
 		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), null);
 
-		Arc leftArc = new Arc(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
-		Arc centerArc = new Arc(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint);
-		Arc rightArc = new Arc(alpha.getSite(), newRightBreakpoint, alpha.getRightBreakpoint());
+		ArcSegment leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
+		ArcSegment centerArcSegment = new ArcSegment(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint);
+		ArcSegment rightArcSegment = new ArcSegment(alpha.getSite(), newRightBreakpoint, alpha.getRightBreakpoint());
 
-		status.put(leftArc, null);
-		status.put(centerArc, null);
-		status.put(rightArc, null);
+		status.put(leftArcSegment, null);
+		status.put(centerArcSegment, null);
+		status.put(rightArcSegment, null);
 
-		/* Check for possible circle events */
-		checkForCircleEvent(leftArc);
-		checkForCircleEvent(rightArc);
+		/* Check for possible circle events with the left and right neighbors */
+		checkForCircleEvent(leftArcSegment);
+		checkForCircleEvent(rightArcSegment);
 	}
 
 	// TODO Implement
@@ -104,12 +109,25 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 	}
 
-	private void checkForCircleEvent(Arc arc)
+	private void checkForCircleEvent(ArcSegment arcSegment)
 	{
-		/* If the arc has no left or right neighbors, there can be no circle event */
-		if (arc.getLeftBreakpoint() == null || arc.getRightBreakpoint() == null) return;
+		/* If the arc has no left or right neighbors (i.e. if it is on the end of the beach line), there can be no
+		circle event */
+		if (arcSegment.getLeftBreakpoint() == null || arcSegment.getRightBreakpoint() == null) return;
 
-		Arc leftNeighbor = status.floorKey(arc);
-		Arc rightNeighbor = status.ceilingKey(arc);
+		Point p1 = arcSegment.getLeftBreakpoint().getLeftArcSegment();
+		Point p2 = arcSegment.getSite();
+		Point p3 = arcSegment.getRightBreakpoint().getRightArcSegment();
+
+		/* If the points make a clockwise turn, we have a circle */
+		if (MathOps.crossProduct(p1, p2, p3) < 0)
+		{
+			Circle circle = MathOps.circle(p1, p2, p3);
+			CircleEvent circleEvent = new CircleEvent(circle.getBottomPoint(), arcSegment);
+
+			/* Add the circle event to the queue and update the pointer in the status tree */
+			queue.add(circleEvent);
+			status.put(arcSegment, circleEvent);
+		}
 	}
 }

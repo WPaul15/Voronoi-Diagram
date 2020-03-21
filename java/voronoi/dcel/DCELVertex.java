@@ -1,6 +1,6 @@
 package voronoi.dcel;
 
-import voronoi.Point;
+import auxiliary.Point;
 
 /**
  * @author Willem Paul
