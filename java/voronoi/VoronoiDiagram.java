@@ -7,6 +7,7 @@ import voronoi.queue.EventQueue;
 import voronoi.tree.Arc;
 import voronoi.tree.Breakpoint;
 import voronoi.tree.StatusTree;
+import voronoi.tree.TreeQuery;
 
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		}
 
 		/* Retrieve the arc directly above the new event */
-		Map.Entry<Arc, CircleEvent> entryAbove = status.floorEntry(new Arc(event.getCoordinates()));
+		Map.Entry<Arc, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event.getCoordinates()));
 		Arc alpha = entryAbove.getKey();
 		CircleEvent circleEvent = entryAbove.getValue();
 
@@ -85,12 +86,14 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), null);
 
 		Arc leftArc = new Arc(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
+		Arc centerArc = new Arc(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint);
 		Arc rightArc = new Arc(alpha.getSite(), newRightBreakpoint, alpha.getRightBreakpoint());
 
 		status.put(leftArc, null);
-		status.put(new Arc(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint), null);
+		status.put(centerArc, null);
 		status.put(rightArc, null);
 
+		/* Check for possible circle events */
 		checkForCircleEvent(leftArc);
 		checkForCircleEvent(rightArc);
 	}

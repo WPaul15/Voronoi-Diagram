@@ -44,15 +44,27 @@ public class Arc implements Comparable<Arc>
 	@Override
 	public int compareTo(Arc compareTo)
 	{
-		if (this.getLeft().getX() == compareTo.getLeft().getX() && this.getRight().getX() == compareTo.getRight().getX())
+		Point thisLeft = this.getLeft();
+		Point thisRight = this.getRight();
+		Point compareToLeft = compareTo.getLeft();
+		Point compareToRight = compareTo.getRight();
+
+		/* Handle tree queries */
+		if (this.getClass() == TreeQuery.class &&
+				(thisLeft.getX() >= compareToLeft.getX() && thisRight.getX() <= compareToRight.getX()))
+		{
 			return 0;
-		if (this.getLeft().getX() >= compareTo.getRight().getX())
+		}
+
+		if (thisLeft.getX() == compareToLeft.getX() && thisRight.getX() == compareToRight.getX())
+			return 0;
+		if (thisLeft.getX() >= compareToRight.getX())
 			return 1;
-		if (this.getRight().getX() <= compareTo.getLeft().getX())
+		if (thisRight.getX() <= compareToLeft.getX())
 			return -1;
 
 		/* Handle the case when a site event appears directly below a breakpoint */
-		return Point.midpoint(this.getLeft(), this.getRight()).compareTo(Point.midpoint(compareTo.getLeft(), compareTo.getRight()));
+		return Point.midpoint(thisLeft, thisRight).compareTo(Point.midpoint(compareToLeft, compareToRight));
 	}
 
 	@Override
@@ -61,14 +73,14 @@ public class Arc implements Comparable<Arc>
 		return "[" + site.toString() + "]";
 	}
 
-	private Point getLeft()
+	protected Point getLeft()
 	{
 		if (leftBreakpoint == null)
 			return new Point(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		return leftBreakpoint.getCoordinates();
 	}
 
-	private Point getRight()
+	protected Point getRight()
 	{
 		if (rightBreakpoint == null)
 			return new Point(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);

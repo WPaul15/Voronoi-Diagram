@@ -45,9 +45,6 @@ public class Main extends Application
 		List<Event> events = readInputFile(parameters.get(0));
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 
-		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(events);
-		writeOutputFile(voronoiDiagram);
-
 		if (display)
 		{
 			Group root = new Group();
@@ -56,12 +53,15 @@ public class Main extends Application
 
 			plotter.plotSiteEvents(events, minX, maxX, minY, maxY);
 			root.getChildren().add(canvas);
-
 			primaryStage.setTitle("Voronoi Diagram");
 			primaryStage.setResizable(false);
 			primaryStage.setScene(new Scene(root));
-			primaryStage.show();
 		}
+
+		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(events);
+		writeOutputFile(voronoiDiagram);
+
+		if (display) primaryStage.show();
 		else Platform.exit();
 	}
 
