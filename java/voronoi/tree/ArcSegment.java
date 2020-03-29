@@ -37,9 +37,19 @@ public class ArcSegment implements Comparable<ArcSegment>
 		return leftBreakpoint;
 	}
 
+	public void setLeftBreakpoint(Breakpoint leftBreakpoint)
+	{
+		this.leftBreakpoint = leftBreakpoint;
+	}
+
 	public Breakpoint getRightBreakpoint()
 	{
 		return rightBreakpoint;
+	}
+
+	public void setRightBreakpoint(Breakpoint rightBreakpoint)
+	{
+		this.rightBreakpoint = rightBreakpoint;
 	}
 
 	@Override
@@ -64,7 +74,7 @@ public class ArcSegment implements Comparable<ArcSegment>
 		if (thisRight.getX() <= compareToLeft.getX())
 			return -1;
 
-		/* Handle the case when a site event appears directly below a breakpoint */
+		/* Handle the case when the first two site points have the same y-coordinate */
 		return MathOps.midpoint(thisLeft, thisRight).compareTo(MathOps.midpoint(compareToLeft, compareToRight));
 	}
 

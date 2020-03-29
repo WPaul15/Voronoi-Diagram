@@ -3,6 +3,8 @@ package display;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import voronoi.dcel.DCELVertex;
+import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.Event;
 
 import java.util.List;
@@ -17,29 +19,32 @@ public class Plotter
 	private GraphicsContext graphicsContext;
 	private double scale;
 
-	public Plotter(double windowWidth, double windowHeight, GraphicsContext graphicsContext)
+	public Plotter(double windowWidth, double windowHeight, GraphicsContext graphicsContext, double minX, double maxX, double minY, double maxY)
 	{
 		this.windowWidth = windowWidth;
 		this.windowHeight = windowHeight;
 		this.graphicsContext = graphicsContext;
-		this.scale = 1;
+		setScale(minX, maxX, minY, maxY);
 	}
 
-	/**
-	 * Plots the site points, scaled according to the spread of the points.
-	 *
-	 * @param events The list of points to be plotted.
-	 */
-	public void plotSiteEvents(List<Event> events, double minX, double maxX, double minY, double maxY)
+	public void plotSiteEvents(List<Event> events)
 	{
-		if (scale == 1) setScale(minX, maxX, minY, maxY);
-
 		graphicsContext.setFill(Color.RED);
-		double factor = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / scale;
 
 		for (Event event : events)
 		{
-			Point2D scaledPoint = scalePoint(event.getCoordinates().getX(), event.getCoordinates().getY(), factor);
+			Point2D scaledPoint = scalePoint(event.getCoordinates().getX(), event.getCoordinates().getY(), scale);
+			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
+		}
+	}
+
+	public void plotDCEL(DoublyConnectedEdgeList dcel)
+	{
+		graphicsContext.setFill(Color.BLACK);
+
+		for (DCELVertex vertex : dcel.getVertices())
+		{
+			Point2D scaledPoint = scalePoint(vertex.getCoordinates().getX(), vertex.getCoordinates().getY(), scale);
 			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
 		}
 	}
@@ -48,11 +53,11 @@ public class Plotter
 	{
 		double maxMax = Math.max(maxX, maxY);
 		double maxMin = Math.max(Math.abs(minX), Math.abs(minY));
-		this.scale = Math.max(maxMax, maxMin);
+		this.scale = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / Math.max(maxMax, maxMin);
 	}
 
-	private Point2D scalePoint(double x, double y, double factor)
+	private Point2D scalePoint(double x, double y, double scale)
 	{
-		return new Point2D((factor * x) + (windowWidth / 2.0), (-factor * y) + (windowHeight / 2.0));
+		return new Point2D((scale * x) + (windowWidth / 2.0), (-scale * y) + (windowHeight / 2.0));
 	}
 }

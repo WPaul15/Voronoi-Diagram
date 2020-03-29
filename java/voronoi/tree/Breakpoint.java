@@ -68,18 +68,29 @@ public class Breakpoint
 		double b2 = (-2 * x) / denominator;
 		double c2 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
 
-		/* Calculate intersection point */
+		/* Calculate intersection points */
 		double a = a1 - a2;
 		double b = b1 - b2;
 		double c = c1 - c2;
 
-		int sign = leftArcSegment.getY() > rightArcSegment.getY() ? -1 : 1;
 		double discriminant = b * b - 4 * a * c;
-		double breakpointX;
+		double x1, x2, breakpointX;
 
-		/* Correct small negative discriminants */
-		if (discriminant <= 0) breakpointX = -b / (2 * a);
-		else breakpointX = (-b + sign * Math.sqrt(discriminant)) / (2 * a);
+		/* Correct small negative discriminants to 0 */
+		if (discriminant <= 0)
+		{
+			x1 = -b / (2 * a);
+			x2 = x1;
+		}
+		else
+		{
+			x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+			x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+		}
+
+		/* Choose the correct intersection */
+		if (leftArcSegment.getY() < rightArcSegment.getY()) breakpointX = Math.max(x1, x2);
+		else breakpointX = Math.min(x1, x2);
 
 		cachedBreakpoint = new Point(breakpointX, 0);
 		return cachedBreakpoint;

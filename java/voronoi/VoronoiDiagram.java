@@ -71,12 +71,11 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		/* Retrieve the arc directly above the new event */
 		Map.Entry<ArcSegment, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event.getCoordinates()));
 		ArcSegment alpha = entryAbove.getKey();
-		CircleEvent circleEvent = entryAbove.getValue();
 
 		/* Remove false circle event if it exists */
-		if (circleEvent != null) queue.remove(circleEvent);
+		if (entryAbove.getValue() != null) queue.remove(entryAbove.getValue());
 
-		/* Replace the leaf from the status tree with a new subtree */
+		/* Replace the old node in the status tree with a new subtree */
 		status.remove(alpha);
 
 		// TODO Create DCEL edges
@@ -102,21 +101,35 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		checkForCircleEvent(rightArcSegment);
 	}
 
-	// TODO Implement
 	private void handleCircleEvent(CircleEvent event)
 	{
 		ArcSegment alpha = event.getDisappearingArcSegment();
 
-		/* Remove the arc segment from the status tree */
+		/* Remove the arc segment from the status tree and update the left and right neighbors */
 		status.remove(alpha);
 
-		/* Delete any other circle events involving alpha */
+		Map.Entry<ArcSegment, CircleEvent> leftEntry = status.lowerEntry(alpha);
+		Map.Entry<ArcSegment, CircleEvent> rightEntry = status.higherEntry(alpha);
 
+		ArcSegment leftNeighbor = leftEntry.getKey();
+		ArcSegment rightNeighbor = rightEntry.getKey();
+
+		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), null);
+
+		leftNeighbor.setRightBreakpoint(newBreakpoint);
+		rightNeighbor.setLeftBreakpoint(newBreakpoint);
+
+		/* Delete any other circle events involving alpha */
+		if (leftEntry.getValue() != null) queue.remove(leftEntry.getValue());
+		if (rightEntry.getValue() != null) queue.remove(rightEntry.getValue());
 
 		// TODO Associate the vertex with an edge
 		/* Add a new Voronoi vertex */
 		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), null);
 		this.getVertices().add(vertex);
+
+		checkForCircleEvent(leftNeighbor);
+		checkForCircleEvent(rightNeighbor);
 	}
 
 	private void checkForCircleEvent(ArcSegment arcSegment)

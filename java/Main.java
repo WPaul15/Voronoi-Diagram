@@ -39,19 +39,19 @@ public class Main extends Application
 	{
 		List<String> parameters = getParameters().getRaw();
 
-		if (parameters.size() < 1)
-			throw new Exception("Input file must be specified");
+		if (parameters.size() != 2)
+			throw new Exception("Please specify an input file and whether or not the resulting Voronoi diagram should be displayed");
 
 		List<Event> events = readInputFile(parameters.get(0));
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 
+		Group root = new Group();
+		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
+		Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D(), minX, maxX, minY, maxY);
+
 		if (display)
 		{
-			Group root = new Group();
-			Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-			Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
-
-			plotter.plotSiteEvents(events, minX, maxX, minY, maxY);
+			plotter.plotSiteEvents(events);
 			root.getChildren().add(canvas);
 			primaryStage.setTitle("Voronoi Diagram");
 			primaryStage.setResizable(false);
@@ -61,7 +61,11 @@ public class Main extends Application
 		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(events);
 		writeOutputFile(voronoiDiagram);
 
-		if (display) primaryStage.show();
+		if (display)
+		{
+			plotter.plotDCEL(voronoiDiagram);
+			primaryStage.show();
+		}
 		else Platform.exit();
 	}
 
