@@ -14,10 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * @author Willem Paul
@@ -42,7 +39,7 @@ public class Main extends Application
 		if (parameters.size() != 2)
 			throw new Exception("Please specify an input file and whether or not the resulting Voronoi diagram should be displayed");
 
-		List<Event> events = readInputFile(parameters.get(0));
+		Set<Event> events = readInputFile(parameters.get(0));
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 
 		Group root = new Group();
@@ -77,10 +74,9 @@ public class Main extends Application
 	 * @param filePath The path to the file containing the input points.
 	 * @return A {@code List} of {@code Event}s created from the points contained in the given file.
 	 */
-	// TODO Filter out duplicate site points
-	private List<Event> readInputFile(String filePath)
+	private Set<Event> readInputFile(String filePath)
 	{
-		List<Event> sites = new ArrayList<>();
+		Set<Event> sites = new HashSet<>();
 
 		try
 		{
@@ -89,7 +85,9 @@ public class Main extends Application
 
 			while (scanner.hasNextLine())
 			{
-				String line = scanner.nextLine();
+				String line = scanner.nextLine().trim();
+				if (line.isEmpty() || line.charAt(0) == '#') continue;
+
 				StringTokenizer tokenizer = new StringTokenizer(line, ") (");
 
 				int i = 0;

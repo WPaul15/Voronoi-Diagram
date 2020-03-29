@@ -11,9 +11,9 @@ import voronoi.tree.ArcSegment;
 import voronoi.tree.Breakpoint;
 import voronoi.tree.TreeQuery;
 
-import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -31,7 +31,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	 *
 	 * @param sites The list of sites for which to construct a Voronoi diagram.
 	 */
-	public VoronoiDiagram(List<Event> sites)
+	public VoronoiDiagram(Set<Event> sites)
 	{
 		queue = new PriorityQueue<>(sites);
 		status = new TreeMap<>();

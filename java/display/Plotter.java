@@ -7,7 +7,7 @@ import voronoi.dcel.DCELVertex;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.Event;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author Willem Paul
@@ -27,7 +27,7 @@ public class Plotter
 		setScale(minX, maxX, minY, maxY);
 	}
 
-	public void plotSiteEvents(List<Event> events)
+	public void plotSiteEvents(Set<Event> events)
 	{
 		graphicsContext.setFill(Color.RED);
 
