@@ -18,6 +18,20 @@ public class Point implements Comparable<Point>
 		this.y = y;
 	}
 
+	public static double distance(Point p1, Point p2)
+	{
+		double a = p1.getX() - p2.getX();
+		double b = p1.getY() - p2.getY();
+		return Math.sqrt((a * a) + (b * b));
+	}
+
+	public static Point midpoint(Point p1, Point p2)
+	{
+		double x = (p1.x + p2.x) / 2;
+		double y = (p1.y + p2.y) / 2;
+		return new Point(x, y);
+	}
+
 	public double getX()
 	{
 		return x;

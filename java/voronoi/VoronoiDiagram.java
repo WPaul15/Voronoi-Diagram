@@ -1,8 +1,10 @@
 package voronoi;
 
 import auxiliary.Circle;
+import auxiliary.Line;
 import auxiliary.MathOps;
 import auxiliary.Point;
+import voronoi.dcel.DCELEdge;
 import voronoi.dcel.DCELVertex;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.CircleEvent;
@@ -29,7 +31,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	/**
 	 * Constructs a Voronoi diagram from the given set of sites using Steven Fortune's line sweep algorithm.
 	 *
-	 * @param sites The list of sites for which to construct a Voronoi diagram.
+	 * @param sites The list of sites for which to construct a Voronoi diagram
 	 */
 	public VoronoiDiagram(Set<Event> sites)
 	{
@@ -78,15 +80,19 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		/* Replace the old node in the status tree with a new subtree */
 		status.remove(alpha);
 
-		// TODO Create DCEL edges
-//		DCELEdge leftEdge = new DCELEdge();
-//		DCELEdge rightEdge = new DCELEdge();
+		DCELEdge leftEdge = new DCELEdge();
+		DCELEdge rightEdge = new DCELEdge(leftEdge);
 
-//		this.getEdges().add(leftEdge);
-//		this.getEdges().add(rightEdge);
+		this.getEdges().add(leftEdge);
+		this.getEdges().add(rightEdge);
 
-		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), null);
-		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), null);
+		Line perpendicularBisector = Line.perpendicularBisector(alpha.getSite(), event.getCoordinates());
+
+		leftEdge.setLine(perpendicularBisector);
+		rightEdge.setLine(perpendicularBisector);
+
+		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), leftEdge);
+		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), rightEdge);
 
 		ArcSegment leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
 		ArcSegment centerArcSegment = new ArcSegment(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint);
@@ -105,7 +111,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	{
 		ArcSegment alpha = event.getDisappearingArcSegment();
 
-		/* Remove the arc segment from the status tree and update the left and right neighbors */
+		/* Remove the arc segment from the status tree and update the breakpoints of the left and right neighbors */
 		status.remove(alpha);
 
 		Map.Entry<ArcSegment, CircleEvent> leftEntry = status.lowerEntry(alpha);
@@ -114,7 +120,21 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		ArcSegment leftNeighbor = leftEntry.getKey();
 		ArcSegment rightNeighbor = rightEntry.getKey();
 
-		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), null);
+		Breakpoint oldLeftBreakpoint = leftNeighbor.getRightBreakpoint();
+		Breakpoint oldRightBreakpoint = rightNeighbor.getLeftBreakpoint();
+
+		DCELEdge leftEdge = new DCELEdge();
+		DCELEdge rightEdge = new DCELEdge(leftEdge);
+
+		this.getEdges().add(leftEdge);
+		this.getEdges().add(rightEdge);
+
+		Line perpendicularBisector = Line.perpendicularBisector(leftNeighbor.getSite(), rightNeighbor.getSite());
+
+		leftEdge.setLine(perpendicularBisector);
+		rightEdge.setLine(perpendicularBisector);
+
+		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), leftEdge);
 
 		leftNeighbor.setRightBreakpoint(newBreakpoint);
 		rightNeighbor.setLeftBreakpoint(newBreakpoint);
@@ -123,10 +143,21 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		if (leftEntry.getValue() != null) queue.remove(leftEntry.getValue());
 		if (rightEntry.getValue() != null) queue.remove(rightEntry.getValue());
 
-		// TODO Associate the vertex with an edge
-		/* Add a new Voronoi vertex */
+		/* Add a new Voronoi vertex and update the edges incident on it */
 		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), null);
 		this.getVertices().add(vertex);
+
+		oldRightBreakpoint.getTracedEdge().getTwin().setOrigin(vertex);
+		oldLeftBreakpoint.getTracedEdge().getTwin().setOrigin(vertex);
+		leftEdge.setOrigin(vertex);
+
+		oldRightBreakpoint.getTracedEdge().getTwin().setPrev(oldLeftBreakpoint.getTracedEdge());
+		oldLeftBreakpoint.getTracedEdge().getTwin().setPrev(rightEdge);
+		leftEdge.setPrev(oldRightBreakpoint.getTracedEdge());
+
+		oldRightBreakpoint.getTracedEdge().setNext(leftEdge);
+		oldLeftBreakpoint.getTracedEdge().setNext(oldRightBreakpoint.getTracedEdge().getTwin());
+		rightEdge.setNext(oldLeftBreakpoint.getTracedEdge().getTwin());
 
 		checkForCircleEvent(leftNeighbor);
 		checkForCircleEvent(rightNeighbor);

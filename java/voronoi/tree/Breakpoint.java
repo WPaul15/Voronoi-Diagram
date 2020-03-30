@@ -1,5 +1,6 @@
 package voronoi.tree;
 
+import auxiliary.Parabola;
 import auxiliary.Point;
 import voronoi.VoronoiDiagram;
 import voronoi.dcel.DCELEdge;
@@ -11,6 +12,7 @@ public class Breakpoint
 {
 	private Point leftArcSegment, rightArcSegment;
 	private DCELEdge tracedEdge;
+
 	private double cachedSweepLinePos;
 	private Point cachedBreakpoint;
 
@@ -38,61 +40,29 @@ public class Breakpoint
 
 		cachedSweepLinePos = currentSweepLinePos;
 
+		Parabola left = new Parabola(leftArcSegment, currentSweepLinePos);
+		Parabola right = new Parabola(rightArcSegment, currentSweepLinePos);
+
 		/* Handle new site point case (degenerate parabola) */
 		if (leftArcSegment.getY() == currentSweepLinePos)
 		{
-			cachedBreakpoint = new Point(leftArcSegment.getX(), 0);
+			cachedBreakpoint = new Point(leftArcSegment.getX(), right.getYFromX(leftArcSegment.getX()));
 			return cachedBreakpoint;
 		}
 		else if (rightArcSegment.getY() == currentSweepLinePos)
 		{
-			cachedBreakpoint = new Point(rightArcSegment.getX(), 0);
+			cachedBreakpoint = new Point(rightArcSegment.getX(), left.getYFromX(rightArcSegment.getX()));
 			return cachedBreakpoint;
 		}
 
-		/* Calculate left parabola */
-		double x = leftArcSegment.getX();
-		double y = leftArcSegment.getY();
-		double denominator = (2 * (y - currentSweepLinePos));
-
-		double a1 = 1 / denominator;
-		double b1 = (-2 * x) / denominator;
-		double c1 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
-
-		/* Calculate right parabola */
-		x = rightArcSegment.getX();
-		y = rightArcSegment.getY();
-		denominator = (2 * (y - currentSweepLinePos));
-
-		double a2 = 1 / denominator;
-		double b2 = (-2 * x) / denominator;
-		double c2 = (x * x + y * y - currentSweepLinePos * currentSweepLinePos) / denominator;
-
-		/* Calculate intersection points */
-		double a = a1 - a2;
-		double b = b1 - b2;
-		double c = c1 - c2;
-
-		double discriminant = b * b - 4 * a * c;
-		double x1, x2, breakpointX;
-
-		/* Correct small negative discriminants to 0 */
-		if (discriminant <= 0)
-		{
-			x1 = -b / (2 * a);
-			x2 = x1;
-		}
-		else
-		{
-			x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
-			x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-		}
+		double[] intersections = Parabola.intersectionX(left, right);
 
 		/* Choose the correct intersection */
-		if (leftArcSegment.getY() < rightArcSegment.getY()) breakpointX = Math.max(x1, x2);
-		else breakpointX = Math.min(x1, x2);
+		double breakpointX;
+		if (leftArcSegment.getY() < rightArcSegment.getY()) breakpointX = Math.max(intersections[0], intersections[1]);
+		else breakpointX = Math.min(intersections[0], intersections[1]);
 
-		cachedBreakpoint = new Point(breakpointX, 0);
+		cachedBreakpoint = new Point(breakpointX, left.getYFromX(breakpointX));
 		return cachedBreakpoint;
 	}
 

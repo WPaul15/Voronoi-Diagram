@@ -41,6 +41,7 @@ public class Plotter
 	public void plotDCEL(DoublyConnectedEdgeList dcel)
 	{
 		graphicsContext.setFill(Color.BLACK);
+		graphicsContext.setStroke(Color.BLACK);
 
 		for (DCELVertex vertex : dcel.getVertices())
 		{
