@@ -144,7 +144,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		if (rightEntry.getValue() != null) queue.remove(rightEntry.getValue());
 
 		/* Add a new Voronoi vertex and update the edges incident on it */
-		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), null);
+		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), leftEdge);
 		this.getVertices().add(vertex);
 
 		oldRightBreakpoint.getTracedEdge().getTwin().setOrigin(vertex);

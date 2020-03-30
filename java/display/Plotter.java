@@ -1,8 +1,10 @@
 package display;
 
+import auxiliary.Point;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import voronoi.dcel.DCELEdge;
 import voronoi.dcel.DCELVertex;
 import voronoi.dcel.DoublyConnectedEdgeList;
 import voronoi.queue.Event;
@@ -33,7 +35,7 @@ public class Plotter
 
 		for (Event event : events)
 		{
-			Point2D scaledPoint = scalePoint(event.getCoordinates().getX(), event.getCoordinates().getY(), scale);
+			Point2D scaledPoint = scalePoint(event.getCoordinates());
 			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
 		}
 	}
@@ -42,11 +44,23 @@ public class Plotter
 	{
 		graphicsContext.setFill(Color.BLACK);
 		graphicsContext.setStroke(Color.BLACK);
+		graphicsContext.setLineWidth(2);
 
 		for (DCELVertex vertex : dcel.getVertices())
 		{
-			Point2D scaledPoint = scalePoint(vertex.getCoordinates().getX(), vertex.getCoordinates().getY(), scale);
+			Point2D scaledPoint = scalePoint(vertex.getCoordinates());
 			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
+		}
+
+		// TODO Prevent each edge from being drawn twice
+		for (DCELEdge edge : dcel.getEdges())
+		{
+			if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null)
+			{
+				Point2D scaledOrigin = scalePoint(edge.getOrigin().getCoordinates());
+				Point2D scaledTwinOrigin = scalePoint(edge.getTwin().getOrigin().getCoordinates());
+				graphicsContext.strokeLine(scaledOrigin.getX() + 2.5, scaledOrigin.getY() + 2.5, scaledTwinOrigin.getX() + 2.5, scaledTwinOrigin.getY() + 2.5);
+			}
 		}
 	}
 
@@ -57,8 +71,8 @@ public class Plotter
 		this.scale = Math.min((windowWidth * 0.85) / 2.0, (windowHeight * 0.85) / 2.0) / Math.max(maxMax, maxMin);
 	}
 
-	private Point2D scalePoint(double x, double y, double scale)
+	private Point2D scalePoint(Point p)
 	{
-		return new Point2D((scale * x) + (windowWidth / 2.0), (-scale * y) + (windowHeight / 2.0));
+		return new Point2D((scale * p.getX()) + (windowWidth / 2.0), (-scale * p.getY()) + (windowHeight / 2.0));
 	}
 }

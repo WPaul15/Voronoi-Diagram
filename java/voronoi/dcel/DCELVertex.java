@@ -65,6 +65,6 @@ public class DCELVertex
 	@Override
 	public String toString()
 	{
-		return getName() + "  " + coordinates.toString();// + "  " + incidentEdge.toString();
+		return getName() + "  " + coordinates.toString() + "  " + incidentEdge.getName();
 	}
 }
