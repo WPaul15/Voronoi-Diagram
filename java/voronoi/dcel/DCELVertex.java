@@ -14,6 +14,7 @@ public class DCELVertex
 	}
 
 	private static int vertexIndex = 0;
+	private static int boundingVertexIndex = 0;
 
 	private int index;
 	private VertexType type;
@@ -30,7 +31,7 @@ public class DCELVertex
 
 	public DCELVertex(VertexType type, Point coordinates)
 	{
-		this.index = ++vertexIndex;
+		this.index = ++boundingVertexIndex;
 		this.type = type;
 		this.coordinates = coordinates;
 		this.incidentEdge = null;

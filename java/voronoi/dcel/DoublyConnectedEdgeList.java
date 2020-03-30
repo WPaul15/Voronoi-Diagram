@@ -1,5 +1,7 @@
 package voronoi.dcel;
 
+import auxiliary.Point;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ public class DoublyConnectedEdgeList
 		this.faces = new ArrayList<>();
 	}
 
-	// TODO Implement
+	// TODO Make sure bounding box contains all site points as well
 	public void computeBoundingBox()
 	{
 		double minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
@@ -31,18 +33,83 @@ public class DoublyConnectedEdgeList
 			double y = v.getCoordinates().getY();
 
 			if (x < minX) minX = x;
-			else if (x > maxX) maxX = x;
+			if (x > maxX) maxX = x;
 
 			if (y < minY) minY = y;
-			else if (y > maxY) maxY = y;
+			if (y > maxY) maxY = y;
 		}
 
-//		DCELVertex b1 = new DCELVertex(1, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(minX - 5, minY - 5)); //Lower left
-//		DCELVertex b2 = new DCELVertex(2, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(maxX + 5, minY - 5)); //Lower right
-//		DCELVertex b3 = new DCELVertex(3, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(maxX + 5, maxY + 5)); //Upper right
-//		DCELVertex b4 = new DCELVertex(4, DCELVertex.VertexType.BOUNDING_VERTEX, new Point(minX - 5, maxY + 5)); //Upper left
-//
-//		DCELEdge e1 = new DCELEdge(b1, null);
+		int boundingBoxPadding = 20;
+		DCELVertex b1 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                               new Point(minX - boundingBoxPadding, minY - boundingBoxPadding)); //Lower left
+		DCELVertex b2 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                               new Point(maxX + boundingBoxPadding, minY - boundingBoxPadding)); //Lower right
+		DCELVertex b3 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                               new Point(maxX + boundingBoxPadding, maxY + boundingBoxPadding)); //Upper right
+		DCELVertex b4 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                               new Point(minX - boundingBoxPadding, maxY + boundingBoxPadding)); //Upper left
+
+		vertices.add(b1);
+		vertices.add(b2);
+		vertices.add(b3);
+		vertices.add(b4);
+
+		DCELEdge bottomInner = new DCELEdge(b1);
+		DCELEdge bottomOuter = new DCELEdge(b2, bottomInner);
+		DCELEdge rightInner = new DCELEdge(b2);
+		DCELEdge rightOuter = new DCELEdge(b3, rightInner);
+		DCELEdge topInner = new DCELEdge(b3);
+		DCELEdge topOuter = new DCELEdge(b4, topInner);
+		DCELEdge leftInner = new DCELEdge(b4);
+		DCELEdge leftOuter = new DCELEdge(b1, leftInner);
+
+		bottomInner.setTwin(bottomOuter);
+		rightInner.setTwin(rightOuter);
+		topInner.setTwin(topOuter);
+		leftInner.setTwin(leftOuter);
+
+		edges.add(bottomInner);
+		edges.add(bottomOuter);
+		edges.add(rightInner);
+		edges.add(rightOuter);
+		edges.add(topInner);
+		edges.add(topOuter);
+		edges.add(leftInner);
+		edges.add(leftOuter);
+
+		b1.setIncidentEdge(bottomInner);
+		b2.setIncidentEdge(rightInner);
+		b3.setIncidentEdge(topInner);
+		b4.setIncidentEdge(leftInner);
+
+		DCELFace uf = new DCELFace(0, null, bottomInner);
+
+		faces.add(uf);
+
+		bottomOuter.setIncidentFace(uf);
+		rightOuter.setIncidentFace(uf);
+		topOuter.setIncidentFace(uf);
+		leftOuter.setIncidentFace(uf);
+
+		bottomInner.setNext(rightInner);
+		rightInner.setNext(topInner);
+		topInner.setNext(leftInner);
+		leftInner.setNext(bottomInner);
+
+		bottomInner.setPrev(leftInner);
+		leftInner.setPrev(topInner);
+		topInner.setPrev(rightInner);
+		rightInner.setPrev(bottomInner);
+
+		bottomOuter.setNext(leftOuter);
+		leftOuter.setNext(topOuter);
+		topOuter.setNext(rightOuter);
+		rightOuter.setNext(bottomOuter);
+
+		bottomOuter.setPrev(rightOuter);
+		rightOuter.setPrev(topOuter);
+		topOuter.setPrev(leftOuter);
+		leftOuter.setPrev(bottomOuter);
 	}
 
 	public List<DCELVertex> getVertices()

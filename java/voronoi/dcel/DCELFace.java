@@ -51,17 +51,26 @@ public class DCELFace
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append(name).append("  ");
-		builder.append(outerComponent.getName()).append("  ");
+
+		if (outerComponent == null) builder.append("nil").append("  ");
+		else builder.append(outerComponent.getName()).append("  ");
 
 		if (innerComponents.isEmpty()) builder.append("nil");
 		else
 		{
-			builder.append('[');
-			for (DCELEdge e : innerComponents)
+			if (innerComponents.size() == 1)
 			{
-				builder.append(e.toString()).append("; ");
+				builder.append(innerComponents.get(0).getName());
 			}
-			builder.append(']');
+			else
+			{
+				builder.append('[');
+				for (DCELEdge e : innerComponents)
+				{
+					builder.append(e.getName()).append("; ");
+				}
+				builder.append(']');
+			}
 		}
 
 		return builder.toString();

@@ -28,6 +28,16 @@ public class DCELEdge
 		this.prev = null;
 	}
 
+	public DCELEdge(DCELVertex origin)
+	{
+		this.name = "";
+		this.origin = origin;
+		this.twin = null;
+		this.incidentFace = null;
+		this.next = null;
+		this.prev = null;
+	}
+
 	/**
 	 * Constructs a new DCEL edge whose twin is the given DCEL edge and sets the twin reference of the given edge to
 	 * this edge.
@@ -44,6 +54,16 @@ public class DCELEdge
 		this.prev = null;
 
 		twin.twin = this;
+	}
+
+	public DCELEdge(DCELVertex origin, DCELEdge twin)
+	{
+		this.name = "";
+		this.origin = origin;
+		this.twin = twin;
+		this.incidentFace = null;
+		this.next = null;
+		this.prev = null;
 	}
 
 	public String getName()

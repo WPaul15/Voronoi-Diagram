@@ -59,6 +59,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		}
 
 		// TODO Compute bounding box and update DCEL
+		computeBoundingBox();
 	}
 
 	private void handleSiteEvent(Event event)
