@@ -21,6 +21,8 @@ public class Plotter
 	private GraphicsContext graphicsContext;
 	private double scale;
 
+	private final double pointRadius = 6;
+
 	public Plotter(double windowWidth, double windowHeight, GraphicsContext graphicsContext, double minX, double maxX, double minY, double maxY)
 	{
 		this.windowWidth = windowWidth;
@@ -36,7 +38,7 @@ public class Plotter
 		for (Event event : events)
 		{
 			Point2D scaledPoint = scalePoint(event.getCoordinates());
-			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
+			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);
 		}
 	}
 
@@ -49,7 +51,7 @@ public class Plotter
 		for (DCELVertex vertex : dcel.getVertices())
 		{
 			Point2D scaledPoint = scalePoint(vertex.getCoordinates());
-			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), 5, 5);
+			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);
 		}
 
 		// TODO Prevent each edge from being drawn twice
@@ -59,7 +61,10 @@ public class Plotter
 			{
 				Point2D scaledOrigin = scalePoint(edge.getOrigin().getCoordinates());
 				Point2D scaledTwinOrigin = scalePoint(edge.getTwin().getOrigin().getCoordinates());
-				graphicsContext.strokeLine(scaledOrigin.getX() + 2.5, scaledOrigin.getY() + 2.5, scaledTwinOrigin.getX() + 2.5, scaledTwinOrigin.getY() + 2.5);
+				graphicsContext.strokeLine(scaledOrigin.getX() + (pointRadius / 2),
+				                           scaledOrigin.getY() + (pointRadius / 2),
+				                           scaledTwinOrigin.getX() + (pointRadius / 2),
+				                           scaledTwinOrigin.getY() + (pointRadius / 2));
 			}
 		}
 	}
