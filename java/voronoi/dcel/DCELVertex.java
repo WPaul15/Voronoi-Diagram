@@ -37,6 +37,14 @@ public class DCELVertex
 		this.incidentEdge = null;
 	}
 
+	public DCELVertex(VertexType type, Point coordinates, DCELEdge incidentEdge)
+	{
+		this.index = ++boundingVertexIndex;
+		this.type = type;
+		this.coordinates = coordinates;
+		this.incidentEdge = incidentEdge;
+	}
+
 	public String getName()
 	{
 		if (type == VertexType.BOUNDING_VERTEX) return "b" + index;
@@ -46,6 +54,11 @@ public class DCELVertex
 	public int getIndex()
 	{
 		return index;
+	}
+
+	public VertexType getType()
+	{
+		return type;
 	}
 
 	public Point getCoordinates()

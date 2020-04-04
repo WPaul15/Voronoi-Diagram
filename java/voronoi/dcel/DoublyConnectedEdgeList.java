@@ -13,6 +13,7 @@ public class DoublyConnectedEdgeList
 	private List<DCELVertex> vertices;
 	private List<DCELEdge> edges;
 	private List<DCELFace> faces;
+	private BoundingBox boundingBox;
 
 	public DoublyConnectedEdgeList()
 	{
@@ -21,8 +22,7 @@ public class DoublyConnectedEdgeList
 		this.faces = new ArrayList<>();
 	}
 
-	// TODO Make sure bounding box contains all site points as well
-	public void computeBoundingBox()
+	protected void computeBoundingBox()
 	{
 		double minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
 		double minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
@@ -63,11 +63,6 @@ public class DoublyConnectedEdgeList
 		DCELEdge leftInner = new DCELEdge(b4);
 		DCELEdge leftOuter = new DCELEdge(b1, leftInner);
 
-		bottomInner.setTwin(bottomOuter);
-		rightInner.setTwin(rightOuter);
-		topInner.setTwin(topOuter);
-		leftInner.setTwin(leftOuter);
-
 		edges.add(bottomInner);
 		edges.add(bottomOuter);
 		edges.add(rightInner);
@@ -77,11 +72,12 @@ public class DoublyConnectedEdgeList
 		edges.add(leftInner);
 		edges.add(leftOuter);
 
-		b1.setIncidentEdge(bottomInner);
-		b2.setIncidentEdge(rightInner);
-		b3.setIncidentEdge(topInner);
-		b4.setIncidentEdge(leftInner);
+		//b1.setIncidentEdge(bottomInner);
+		//b2.setIncidentEdge(rightInner);
+		//b3.setIncidentEdge(topInner);
+		//b4.setIncidentEdge(leftInner);
 
+		// TODO Move to face calculation method
 		DCELFace uf = new DCELFace(0, null, bottomInner);
 
 		faces.add(uf);
@@ -110,6 +106,8 @@ public class DoublyConnectedEdgeList
 		rightOuter.setPrev(topOuter);
 		topOuter.setPrev(leftOuter);
 		leftOuter.setPrev(bottomOuter);
+
+		this.boundingBox = new BoundingBox(bottomOuter, leftOuter, rightOuter, topOuter, b1, b3);
 	}
 
 	public List<DCELVertex> getVertices()
@@ -117,19 +115,9 @@ public class DoublyConnectedEdgeList
 		return vertices;
 	}
 
-	public void setVertices(List<DCELVertex> vertices)
-	{
-		this.vertices = vertices;
-	}
-
 	public List<DCELEdge> getEdges()
 	{
 		return edges;
-	}
-
-	public void setEdges(List<DCELEdge> edges)
-	{
-		this.edges = edges;
 	}
 
 	public List<DCELFace> getFaces()
@@ -137,9 +125,9 @@ public class DoublyConnectedEdgeList
 		return faces;
 	}
 
-	public void setFaces(List<DCELFace> faces)
+	public BoundingBox getBoundingBox()
 	{
-		this.faces = faces;
+		return boundingBox;
 	}
 
 	@Override
@@ -176,5 +164,44 @@ public class DoublyConnectedEdgeList
 		}
 
 		return builder.toString();
+	}
+
+	public static class BoundingBox
+	{
+		private DCELEdge bottomOuter, leftOuter, rightOuter, topOuter;
+		private DCELVertex lowerLeft, upperRight;
+
+		public BoundingBox(DCELEdge bottomOuter, DCELEdge leftOuter, DCELEdge rightOuter, DCELEdge topOuter, DCELVertex lowerLeft, DCELVertex upperRight)
+		{
+			this.bottomOuter = bottomOuter;
+			this.leftOuter = leftOuter;
+			this.rightOuter = rightOuter;
+			this.topOuter = topOuter;
+			this.lowerLeft = lowerLeft;
+			this.upperRight = upperRight;
+		}
+
+		public DCELEdge getIntersectedEdge(Point p)
+		{
+			double x = p.getX();
+			double y = p.getY();
+
+			if (x == leftOuter.getOrigin().getCoordinates().getX()) return leftOuter;
+			if (x == rightOuter.getOrigin().getCoordinates().getX()) return rightOuter;
+			if (y == bottomOuter.getOrigin().getCoordinates().getY()) return bottomOuter;
+			if (y == topOuter.getOrigin().getCoordinates().getY()) return topOuter;
+
+			return null;
+		}
+
+		public DCELVertex getLowerLeft()
+		{
+			return lowerLeft;
+		}
+
+		public DCELVertex getUpperRight()
+		{
+			return upperRight;
+		}
 	}
 }

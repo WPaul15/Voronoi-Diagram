@@ -1,7 +1,7 @@
 package voronoi;
 
 import auxiliary.Circle;
-import auxiliary.Line;
+import auxiliary.LineVector;
 import auxiliary.MathOps;
 import auxiliary.Point;
 import voronoi.dcel.DCELEdge;
@@ -13,10 +13,7 @@ import voronoi.tree.ArcSegment;
 import voronoi.tree.Breakpoint;
 import voronoi.tree.TreeQuery;
 
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author Willem Paul
@@ -60,6 +57,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 		// TODO Compute bounding box and update DCEL
 		computeBoundingBox();
+		connectInfiniteEdges();
 	}
 
 	private void handleSiteEvent(Event event)
@@ -87,10 +85,10 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		this.getEdges().add(leftEdge);
 		this.getEdges().add(rightEdge);
 
-		Line perpendicularBisector = Line.perpendicularBisector(alpha.getSite(), event.getCoordinates());
+		LineVector perpendicularBisector = LineVector.perpendicularBisector(alpha.getSite(), event.getCoordinates());
 
-		leftEdge.setLine(perpendicularBisector);
-		rightEdge.setLine(perpendicularBisector);
+		leftEdge.setLineVector(perpendicularBisector);
+		rightEdge.setLineVector(perpendicularBisector);
 
 		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), leftEdge);
 		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), rightEdge);
@@ -130,10 +128,10 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		this.getEdges().add(leftEdge);
 		this.getEdges().add(rightEdge);
 
-		Line perpendicularBisector = Line.perpendicularBisector(leftNeighbor.getSite(), rightNeighbor.getSite());
+		LineVector perpendicularBisector = LineVector.perpendicularBisector(leftNeighbor.getSite(), rightNeighbor.getSite());
 
-		leftEdge.setLine(perpendicularBisector);
-		rightEdge.setLine(perpendicularBisector);
+		leftEdge.setLineVector(perpendicularBisector);
+		rightEdge.setLineVector(perpendicularBisector);
 
 		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), leftEdge);
 
@@ -184,5 +182,76 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			queue.add(circleEvent);
 			status.put(arcSegment, circleEvent);
 		}
+	}
+
+	// TODO Handle collinear site points case
+	// TODO Handle case where edge intersects a corner of the bounding box
+	private void connectInfiniteEdges()
+	{
+		Point min = getBoundingBox().getLowerLeft().getCoordinates();
+		Point max = getBoundingBox().getUpperRight().getCoordinates();
+
+		ArrayList<DCELEdge> toAdd = new ArrayList<>();
+
+		for (DCELEdge edge : this.getEdges())
+		{
+			if (edge.getOrigin() == null)
+			{
+				Point p = edge.getTwin().getOrigin().getCoordinates();
+				double[] lVector = edge.getLineVector().getVector();
+
+				double tx1 = (min.getX() - p.getX()) * (1 / lVector[0]);
+				double tx2 = (max.getX() - p.getX()) * (1 / lVector[0]);
+
+				double tMin = Math.min(tx1, tx2);
+				double tMax = Math.max(tx1, tx2);
+
+				double ty1 = (min.getY() - p.getY()) * (1 / lVector[1]);
+				double ty2 = (max.getY() - p.getY()) * (1 / lVector[1]);
+
+				tMin = Math.max(tMin, Math.min(ty1, ty2));
+				tMax = Math.min(tMax, Math.max(ty1, ty2));
+
+				Point intersection;
+				Point maxIntersection = new Point((lVector[0] * tMax) + p.getX(), (lVector[1] * tMax) + p.getY());
+				Point minIntersection = new Point((lVector[0] * tMin) + p.getX(), (lVector[1] * tMin) + p.getY());
+
+				if (Point.distance(p, maxIntersection) < Point.distance(p, minIntersection))
+					intersection = maxIntersection;
+				else
+					intersection = minIntersection;
+
+				DCELVertex vertex = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection, edge);
+				this.getVertices().add(vertex);
+
+				DCELEdge outerBoundingEdge = getBoundingBox().getIntersectedEdge(intersection);
+				DCELEdge innerBoundingEdge = outerBoundingEdge.getTwin();
+				DCELEdge newOuterBoundingEdge = new DCELEdge(innerBoundingEdge);
+				DCELEdge newInnerBoundingEdge = new DCELEdge(outerBoundingEdge);
+
+				toAdd.add(newOuterBoundingEdge);
+				toAdd.add(newInnerBoundingEdge);
+
+				edge.setOrigin(vertex);
+				newOuterBoundingEdge.setOrigin(vertex);
+				newInnerBoundingEdge.setOrigin(vertex);
+
+				newOuterBoundingEdge.setIncidentFace(outerBoundingEdge.getIncidentFace());
+
+				newOuterBoundingEdge.setNext(outerBoundingEdge.getNext());
+				outerBoundingEdge.setNext(newOuterBoundingEdge);
+				newInnerBoundingEdge.setNext(innerBoundingEdge.getNext());
+				innerBoundingEdge.setNext(edge);
+				edge.getTwin().setNext(newInnerBoundingEdge);
+
+				newOuterBoundingEdge.setPrev(outerBoundingEdge);
+				newOuterBoundingEdge.getNext().setPrev(outerBoundingEdge);
+				newInnerBoundingEdge.setPrev(edge.getTwin());
+				newInnerBoundingEdge.getNext().setPrev(newInnerBoundingEdge);
+				edge.setPrev(innerBoundingEdge);
+			}
+		}
+
+		getEdges().addAll(toAdd);
 	}
 }

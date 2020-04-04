@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * @author Willem Paul
  */
-public class Plotter
+public class Visualizer
 {
 	private double windowWidth;
 	private double windowHeight;
@@ -23,7 +23,8 @@ public class Plotter
 
 	private final double pointRadius = 6;
 
-	public Plotter(double windowWidth, double windowHeight, GraphicsContext graphicsContext, double minX, double maxX, double minY, double maxY)
+	// TODO Make sure all DCEL vertices are visible
+	public Visualizer(double windowWidth, double windowHeight, GraphicsContext graphicsContext, double minX, double maxX, double minY, double maxY)
 	{
 		this.windowWidth = windowWidth;
 		this.windowHeight = windowHeight;
@@ -42,7 +43,7 @@ public class Plotter
 		}
 	}
 
-	public void plotDCEL(DoublyConnectedEdgeList dcel)
+	public void drawDCEL(DoublyConnectedEdgeList dcel)
 	{
 		graphicsContext.setFill(Color.BLACK);
 		graphicsContext.setStroke(Color.BLACK);

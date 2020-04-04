@@ -1,5 +1,5 @@
 import auxiliary.Point;
-import display.Plotter;
+import display.Visualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -44,11 +44,11 @@ public class Main extends Application
 
 		Group root = new Group();
 		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-		Plotter plotter = new Plotter(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D(), minX, maxX, minY, maxY);
+		Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D(), minX, maxX, minY, maxY);
 
 		if (display)
 		{
-			plotter.plotSiteEvents(events);
+			visualizer.plotSiteEvents(events);
 			root.getChildren().add(canvas);
 			primaryStage.setTitle("Voronoi Diagram");
 			primaryStage.setResizable(false);
@@ -60,7 +60,7 @@ public class Main extends Application
 
 		if (display)
 		{
-			plotter.plotDCEL(voronoiDiagram);
+			visualizer.drawDCEL(voronoiDiagram);
 			primaryStage.show();
 		}
 		else Platform.exit();

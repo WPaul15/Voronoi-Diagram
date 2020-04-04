@@ -1,6 +1,6 @@
 package voronoi.dcel;
 
-import auxiliary.Line;
+import auxiliary.LineVector;
 
 /**
  * @author Willem Paul
@@ -13,7 +13,7 @@ public class DCELEdge
 	private DCELEdge twin, next, prev;
 
 	/* Store the line along which this edge lies for easier calculations later */
-	private Line line;
+	private LineVector lineVector;
 
 	/**
 	 * Constructs a new DCEL edge.
@@ -36,6 +36,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+
+		origin.setIncidentEdge(this);
 	}
 
 	/**
@@ -64,6 +66,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+
+		twin.twin = this;
 	}
 
 	public String getName()
@@ -71,9 +75,17 @@ public class DCELEdge
 		if (name.equals(""))
 		{
 			StringBuilder builder = new StringBuilder();
-			builder.append('e');
+			//builder.append('e');
 
-			if (origin != null) builder.append(origin.getIndex());
+			// For testing purposes; helps differentiate between the edges of the diagram and the edges along the bounding box
+			if (origin != null)
+			{
+				if (origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX || twin.origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX)
+					builder.append("ve");
+				else
+					builder.append("be");
+				builder.append(origin.getIndex());
+			}
 			if (twin != null && twin.origin != null) builder.append(',').append(twin.origin.getIndex());
 
 			return builder.toString();
@@ -132,14 +144,14 @@ public class DCELEdge
 		this.prev = prev;
 	}
 
-	public Line getLine()
+	public LineVector getLineVector()
 	{
-		return line;
+		return lineVector;
 	}
 
-	public void setLine(Line line)
+	public void setLineVector(LineVector lineVector)
 	{
-		this.line = line;
+		this.lineVector = lineVector;
 	}
 
 	@Override
@@ -149,10 +161,10 @@ public class DCELEdge
 
 		builder.append(getName());
 		if (origin != null) builder.append("  ").append(origin.getName());
-		if (twin != null) builder.append("  ").append(twin.getName());
-		if (incidentFace != null) builder.append("  ").append(incidentFace.getName());
-		if (next != null) builder.append("  ").append(next.getName());
-		if (prev != null) builder.append("  ").append(prev.getName());
+		if (twin != null) builder.append("  T:").append(twin.getName());
+		//if (incidentFace != null) builder.append("  F:").append(incidentFace.getName());
+		if (next != null) builder.append("  N:").append(next.getName());
+		if (prev != null) builder.append("  P:").append(prev.getName());
 
 		return builder.toString();
 
