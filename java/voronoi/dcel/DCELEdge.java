@@ -36,8 +36,6 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
-
-		origin.setIncidentEdge(this);
 	}
 
 	/**
@@ -78,7 +76,7 @@ public class DCELEdge
 			//builder.append('e');
 
 			// For testing purposes; helps differentiate between the edges of the diagram and the edges along the bounding box
-			if (origin != null)
+			if (origin != null && twin.origin != null)
 			{
 				if (origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX || twin.origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX)
 					builder.append("ve");
@@ -162,7 +160,7 @@ public class DCELEdge
 		builder.append(getName());
 		if (origin != null) builder.append("  ").append(origin.getName());
 		if (twin != null) builder.append("  T:").append(twin.getName());
-		//if (incidentFace != null) builder.append("  F:").append(incidentFace.getName());
+		if (incidentFace != null) builder.append("  F:").append(incidentFace.getName());
 		if (next != null) builder.append("  N:").append(next.getName());
 		if (prev != null) builder.append("  P:").append(prev.getName());
 

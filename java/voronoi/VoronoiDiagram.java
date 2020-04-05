@@ -245,7 +245,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				edge.getTwin().setNext(newInnerBoundingEdge);
 
 				newOuterBoundingEdge.setPrev(outerBoundingEdge);
-				newOuterBoundingEdge.getNext().setPrev(outerBoundingEdge);
+				newOuterBoundingEdge.getNext().setPrev(newOuterBoundingEdge);
 				newInnerBoundingEdge.setPrev(edge.getTwin());
 				newInnerBoundingEdge.getNext().setPrev(newInnerBoundingEdge);
 				edge.setPrev(innerBoundingEdge);

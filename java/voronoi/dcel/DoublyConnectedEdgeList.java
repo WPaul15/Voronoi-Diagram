@@ -63,6 +63,11 @@ public class DoublyConnectedEdgeList
 		DCELEdge leftInner = new DCELEdge(b4);
 		DCELEdge leftOuter = new DCELEdge(b1, leftInner);
 
+		b1.setIncidentEdge(leftOuter);
+		b2.setIncidentEdge(bottomOuter);
+		b3.setIncidentEdge(rightOuter);
+		b4.setIncidentEdge(topOuter);
+
 		edges.add(bottomInner);
 		edges.add(bottomOuter);
 		edges.add(rightInner);
@@ -71,11 +76,6 @@ public class DoublyConnectedEdgeList
 		edges.add(topOuter);
 		edges.add(leftInner);
 		edges.add(leftOuter);
-
-		//b1.setIncidentEdge(bottomInner);
-		//b2.setIncidentEdge(rightInner);
-		//b3.setIncidentEdge(topInner);
-		//b4.setIncidentEdge(leftInner);
 
 		// TODO Move to face calculation method
 		DCELFace uf = new DCELFace(0, null, bottomInner);
@@ -107,7 +107,7 @@ public class DoublyConnectedEdgeList
 		topOuter.setPrev(leftOuter);
 		leftOuter.setPrev(bottomOuter);
 
-		this.boundingBox = new BoundingBox(bottomOuter, leftOuter, rightOuter, topOuter, b1, b3);
+		this.boundingBox = new BoundingBox(b1, b2, b3, b4);
 	}
 
 	public List<DCELVertex> getVertices()
@@ -168,17 +168,14 @@ public class DoublyConnectedEdgeList
 
 	public static class BoundingBox
 	{
-		private DCELEdge bottomOuter, leftOuter, rightOuter, topOuter;
-		private DCELVertex lowerLeft, upperRight;
+		private DCELVertex lowerLeft, lowerRight, upperRight, upperLeft;
 
-		public BoundingBox(DCELEdge bottomOuter, DCELEdge leftOuter, DCELEdge rightOuter, DCELEdge topOuter, DCELVertex lowerLeft, DCELVertex upperRight)
+		public BoundingBox(DCELVertex lowerLeft, DCELVertex lowerRight, DCELVertex upperRight, DCELVertex upperLeft)
 		{
-			this.bottomOuter = bottomOuter;
-			this.leftOuter = leftOuter;
-			this.rightOuter = rightOuter;
-			this.topOuter = topOuter;
 			this.lowerLeft = lowerLeft;
+			this.lowerRight = lowerRight;
 			this.upperRight = upperRight;
+			this.upperLeft = upperLeft;
 		}
 
 		public DCELEdge getIntersectedEdge(Point p)
@@ -186,10 +183,47 @@ public class DoublyConnectedEdgeList
 			double x = p.getX();
 			double y = p.getY();
 
-			if (x == leftOuter.getOrigin().getCoordinates().getX()) return leftOuter;
-			if (x == rightOuter.getOrigin().getCoordinates().getX()) return rightOuter;
-			if (y == bottomOuter.getOrigin().getCoordinates().getY()) return bottomOuter;
-			if (y == topOuter.getOrigin().getCoordinates().getY()) return topOuter;
+			/* Traverse the left boundary */
+			if (x == lowerLeft.getCoordinates().getX())
+			{
+				DCELEdge edge = lowerLeft.getIncidentEdge();
+				while (y > edge.getTwin().getOrigin().getCoordinates().getY())
+				{
+					edge = edge.getNext();
+				}
+				return edge;
+			}
+			/* Traverse the right boundary */
+			else if (x == upperRight.getCoordinates().getX())
+			{
+				DCELEdge edge = upperRight.getIncidentEdge();
+				while (y < edge.getTwin().getOrigin().getCoordinates().getY())
+				{
+					edge = edge.getNext();
+				}
+				return edge;
+			}
+
+			/* Traverse the lower boundary */
+			if (y == lowerLeft.getCoordinates().getY())
+			{
+				DCELEdge edge = lowerRight.getIncidentEdge();
+				while (x < edge.getTwin().getOrigin().getCoordinates().getY())
+				{
+					edge = edge.getNext();
+				}
+				return edge;
+			}
+			/* Traverse the upper boundary */
+			else if (y == upperRight.getCoordinates().getY())
+			{
+				DCELEdge edge = upperLeft.getIncidentEdge();
+				while (x > edge.getTwin().getOrigin().getCoordinates().getY())
+				{
+					edge = edge.getNext();
+				}
+				return edge;
+			}
 
 			return null;
 		}
