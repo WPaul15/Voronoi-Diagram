@@ -68,6 +68,11 @@ public class DCELEdge
 		twin.twin = this;
 	}
 
+	public boolean isVoronoiEdge()
+	{
+		return origin.isVoronoiVertex() || twin.origin.isVoronoiVertex();
+	}
+
 	public String getName()
 	{
 		if (name.equals(""))
@@ -78,7 +83,7 @@ public class DCELEdge
 			// For testing purposes; helps differentiate between the edges of the diagram and the edges along the bounding box
 			if (origin != null && twin.origin != null)
 			{
-				if (origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX || twin.origin.getType() == DCELVertex.VertexType.VORONOI_VERTEX)
+				if (isVoronoiEdge())
 					builder.append("ve");
 				else
 					builder.append("be");

@@ -45,10 +45,15 @@ public class DCELVertex
 		this.incidentEdge = incidentEdge;
 	}
 
+	public boolean isVoronoiVertex()
+	{
+		return type == VertexType.VORONOI_VERTEX;
+	}
+
 	public String getName()
 	{
-		if (type == VertexType.BOUNDING_VERTEX) return "b" + index;
-		else return "v" + index;
+		if (isVoronoiVertex()) return "v" + index;
+		else return "b" + index;
 	}
 
 	public int getIndex()

@@ -51,14 +51,19 @@ public class Visualizer
 
 		for (DCELVertex vertex : dcel.getVertices())
 		{
-			Point2D scaledPoint = scalePoint(vertex.getCoordinates());
-			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);
+			/* Don't display bounding box vertices; they aren't visible anyway */
+			if (vertex.isVoronoiVertex())
+			{
+				Point2D scaledPoint = scalePoint(vertex.getCoordinates());
+				graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);
+			}
 		}
 
 		// TODO Prevent each edge from being drawn twice
 		for (DCELEdge edge : dcel.getEdges())
 		{
-			if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null)
+			/* Don't display bounding box edges; they aren't visible anyway */
+			if ((edge.getOrigin() != null && edge.getTwin().getOrigin() != null) && edge.isVoronoiEdge())
 			{
 				Point2D scaledOrigin = scalePoint(edge.getOrigin().getCoordinates());
 				Point2D scaledTwinOrigin = scalePoint(edge.getTwin().getOrigin().getCoordinates());
@@ -79,6 +84,7 @@ public class Visualizer
 
 	private Point2D scalePoint(Point p)
 	{
-		return new Point2D((scale * p.getX()) + (windowWidth / 2.0), (-scale * p.getY()) + (windowHeight / 2.0));
+		return new Point2D((scale * p.getX()) + (windowWidth / 2.0),
+		                   (-scale * p.getY()) + (windowHeight / 2.0));
 	}
 }
