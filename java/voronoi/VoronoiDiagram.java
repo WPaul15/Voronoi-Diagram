@@ -4,11 +4,9 @@ import auxiliary.Circle;
 import auxiliary.LineVector;
 import auxiliary.MathOps;
 import auxiliary.Point;
-import voronoi.dcel.DCELEdge;
-import voronoi.dcel.DCELVertex;
-import voronoi.dcel.DoublyConnectedEdgeList;
-import voronoi.queue.CircleEvent;
-import voronoi.queue.Event;
+import dcel.DCELEdge;
+import dcel.DCELVertex;
+import dcel.DoublyConnectedEdgeList;
 import voronoi.tree.ArcSegment;
 import voronoi.tree.Breakpoint;
 import voronoi.tree.TreeQuery;
@@ -20,7 +18,7 @@ import java.util.*;
  */
 public class VoronoiDiagram extends DoublyConnectedEdgeList
 {
-	private PriorityQueue<Event> queue;
+	private PriorityQueue<Point> queue;
 	private TreeMap<ArcSegment, CircleEvent> status;
 
 	private static double sweepLinePos = Double.MIN_VALUE;
@@ -30,7 +28,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	 *
 	 * @param sites The list of sites for which to construct a Voronoi diagram
 	 */
-	public VoronoiDiagram(Set<Event> sites)
+	public VoronoiDiagram(Set<Point> sites)
 	{
 		queue = new PriorityQueue<>(sites);
 		status = new TreeMap<>();
@@ -47,12 +45,12 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	{
 		while (!queue.isEmpty())
 		{
-			Event event = queue.poll();
-			sweepLinePos = event.getCoordinates().getY();
-			if (event.getClass() == Event.class)
-				handleSiteEvent(event);
-			else
+			Point event = queue.poll();
+			sweepLinePos = event.getY();
+			if (event.getClass() == CircleEvent.class)
 				handleCircleEvent((CircleEvent) event);
+			else
+				handleSiteEvent(event);
 		}
 
 		// TODO Compute bounding box and update DCEL
@@ -60,17 +58,17 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		connectInfiniteEdges();
 	}
 
-	private void handleSiteEvent(Event event)
+	private void handleSiteEvent(Point event)
 	{
 		/* If the status tree is empty, insert the arc given by the event */
 		if (status.isEmpty())
 		{
-			status.put(new ArcSegment(event.getCoordinates()), null);
+			status.put(new ArcSegment(event), null);
 			return;
 		}
 
 		/* Retrieve the arc directly above the new event */
-		Map.Entry<ArcSegment, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event.getCoordinates()));
+		Map.Entry<ArcSegment, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event));
 		ArcSegment alpha = entryAbove.getKey();
 
 		/* Remove false circle event if it exists */
@@ -85,16 +83,16 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		this.getEdges().add(leftEdge);
 		this.getEdges().add(rightEdge);
 
-		LineVector perpendicularBisector = LineVector.perpendicularBisector(alpha.getSite(), event.getCoordinates());
+		LineVector perpendicularBisector = LineVector.perpendicularBisector(alpha.getSite(), event);
 
 		leftEdge.setLineVector(perpendicularBisector);
 		rightEdge.setLineVector(perpendicularBisector);
 
-		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event.getCoordinates(), leftEdge);
-		Breakpoint newRightBreakpoint = new Breakpoint(event.getCoordinates(), alpha.getSite(), rightEdge);
+		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
+		Breakpoint newRightBreakpoint = new Breakpoint(event, alpha.getSite(), rightEdge);
 
 		ArcSegment leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
-		ArcSegment centerArcSegment = new ArcSegment(event.getCoordinates(), newLeftBreakpoint, newRightBreakpoint);
+		ArcSegment centerArcSegment = new ArcSegment(event, newLeftBreakpoint, newRightBreakpoint);
 		ArcSegment rightArcSegment = new ArcSegment(alpha.getSite(), newRightBreakpoint, alpha.getRightBreakpoint());
 
 		status.put(leftArcSegment, null);

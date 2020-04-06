@@ -1,4 +1,4 @@
-package voronoi.dcel;
+package dcel;
 
 import auxiliary.LineVector;
 

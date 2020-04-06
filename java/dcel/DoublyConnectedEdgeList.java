@@ -1,4 +1,4 @@
-package voronoi.dcel;
+package dcel;
 
 import auxiliary.Point;
 
@@ -128,6 +128,17 @@ public class DoublyConnectedEdgeList
 	public BoundingBox getBoundingBox()
 	{
 		return boundingBox;
+	}
+
+	public List<Point> getVerticesForDisplay()
+	{
+		List<Point> points = new ArrayList<>();
+		for (DCELVertex vertex : vertices)
+		{
+			if (vertex.isVoronoiVertex())
+				points.add(new Point(vertex.getCoordinates().getX(), vertex.getCoordinates().getY()));
+		}
+		return points;
 	}
 
 	@Override

@@ -1,4 +1,5 @@
 import auxiliary.Point;
+import dcel.DoublyConnectedEdgeList;
 import display.Visualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -7,8 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
 import voronoi.VoronoiDiagram;
-import voronoi.dcel.DoublyConnectedEdgeList;
-import voronoi.queue.Event;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,27 +38,26 @@ public class Main extends Application
 		if (parameters.size() != 2)
 			throw new Exception("Please specify an input file and whether or not the resulting Voronoi diagram should be displayed");
 
-		Set<Event> events = readInputFile(parameters.get(0));
+		Set<Point> sitePoints = readInputFile(parameters.get(0));
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 
-		Group root = new Group();
-		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-		Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D(), minX, maxX, minY, maxY);
-
-		if (display)
-		{
-			visualizer.plotSiteEvents(events);
-			root.getChildren().add(canvas);
-			primaryStage.setTitle("Voronoi Diagram");
-			primaryStage.setResizable(false);
-			primaryStage.setScene(new Scene(root));
-		}
-
-		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(events);
+		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(sitePoints);
 		writeOutputFile(voronoiDiagram);
 
 		if (display)
 		{
+			Group root = new Group();
+			Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
+			root.getChildren().add(canvas);
+
+			primaryStage.setTitle("Voronoi Diagram");
+			primaryStage.setResizable(false);
+			primaryStage.setScene(new Scene(root));
+
+			Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
+			visualizer.setScale(minX, maxX, minY, maxY);
+			//visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
+			visualizer.plotSiteEvents(sitePoints);
 			visualizer.drawDCEL(voronoiDiagram);
 			primaryStage.show();
 		}
@@ -74,9 +72,9 @@ public class Main extends Application
 	 * @param filePath The path to the file containing the input points.
 	 * @return A {@code List} of {@code Event}s created from the points contained in the given file.
 	 */
-	private Set<Event> readInputFile(String filePath)
+	private Set<Point> readInputFile(String filePath)
 	{
-		Set<Event> sites = new HashSet<>();
+		Set<Point> sites = new HashSet<>();
 
 		try
 		{
@@ -97,7 +95,7 @@ public class Main extends Application
 					coordinates[i++] = Double.parseDouble(tokenizer.nextToken().replaceAll(",", ""));
 					if (i % 2 == 0)
 					{
-						sites.add(new Event(new Point(coordinates[0], coordinates[1])));
+						sites.add(new Point(coordinates[0], coordinates[1]));
 
 						if (coordinates[0] < minX) minX = coordinates[0];
 						else if (coordinates[0] > maxX) maxX = coordinates[0];

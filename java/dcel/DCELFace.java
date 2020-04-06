@@ -1,4 +1,4 @@
-package voronoi.dcel;
+package dcel;
 
 import java.util.ArrayList;
 import java.util.Collections;

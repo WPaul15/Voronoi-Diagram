@@ -18,6 +18,12 @@ public class Point implements Comparable<Point>
 		this.y = y;
 	}
 
+	public Point(Point p)
+	{
+		this.x = p.x;
+		this.y = p.y;
+	}
+
 	public static double distance(Point p1, Point p2)
 	{
 		double a = p1.getX() - p2.getX();
@@ -45,8 +51,8 @@ public class Point implements Comparable<Point>
 	@Override
 	public int compareTo(Point point)
 	{
-		int compareY = Double.compare(this.y, point.y);
-		return compareY == 0 ? Double.compare(this.x, point.x) : compareY;
+		int compareY = Double.compare(point.y, this.y);
+		return compareY == 0 ? Double.compare(point.x, this.x) : compareY;
 	}
 
 	@Override

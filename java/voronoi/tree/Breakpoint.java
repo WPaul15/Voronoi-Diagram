@@ -2,8 +2,8 @@ package voronoi.tree;
 
 import auxiliary.Parabola;
 import auxiliary.Point;
+import dcel.DCELEdge;
 import voronoi.VoronoiDiagram;
-import voronoi.dcel.DCELEdge;
 
 /**
  * @author Willem Paul

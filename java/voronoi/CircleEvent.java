@@ -1,9 +1,10 @@
-package voronoi.queue;
+package voronoi;
 
 import auxiliary.Circle;
+import auxiliary.Point;
 import voronoi.tree.ArcSegment;
 
-public class CircleEvent extends Event
+public class CircleEvent extends Point
 {
 	private Circle circle;
 	private ArcSegment disappearingArcSegment;
@@ -23,11 +24,5 @@ public class CircleEvent extends Event
 	public ArcSegment getDisappearingArcSegment()
 	{
 		return disappearingArcSegment;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "C" + getCoordinates().toString();
 	}
 }
