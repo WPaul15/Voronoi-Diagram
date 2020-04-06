@@ -1,5 +1,6 @@
 package dcel;
 
+import auxiliary.MathOps;
 import auxiliary.Point;
 
 import java.util.ArrayList;
@@ -195,7 +196,7 @@ public class DoublyConnectedEdgeList
 			double y = p.getY();
 
 			/* Traverse the left boundary */
-			if (x == lowerLeft.getCoordinates().getX())
+			if (MathOps.thresholdEquals(x, lowerLeft.getCoordinates().getX()))
 			{
 				DCELEdge edge = lowerLeft.getIncidentEdge();
 				while (y > edge.getTwin().getOrigin().getCoordinates().getY())
@@ -205,7 +206,7 @@ public class DoublyConnectedEdgeList
 				return edge;
 			}
 			/* Traverse the right boundary */
-			else if (x == upperRight.getCoordinates().getX())
+			else if (MathOps.thresholdEquals(x, upperRight.getCoordinates().getX()))
 			{
 				DCELEdge edge = upperRight.getIncidentEdge();
 				while (y < edge.getTwin().getOrigin().getCoordinates().getY())
@@ -216,7 +217,7 @@ public class DoublyConnectedEdgeList
 			}
 
 			/* Traverse the lower boundary */
-			if (y == lowerLeft.getCoordinates().getY())
+			if (MathOps.thresholdEquals(y, lowerLeft.getCoordinates().getY()))
 			{
 				DCELEdge edge = lowerRight.getIncidentEdge();
 				while (x < edge.getTwin().getOrigin().getCoordinates().getY())
@@ -226,7 +227,7 @@ public class DoublyConnectedEdgeList
 				return edge;
 			}
 			/* Traverse the upper boundary */
-			else if (y == upperRight.getCoordinates().getY())
+			else if (MathOps.thresholdEquals(y, upperRight.getCoordinates().getY()))
 			{
 				DCELEdge edge = upperLeft.getIncidentEdge();
 				while (x > edge.getTwin().getOrigin().getCoordinates().getY())

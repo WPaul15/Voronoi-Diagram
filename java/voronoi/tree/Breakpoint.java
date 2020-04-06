@@ -55,6 +55,17 @@ public class Breakpoint
 			return cachedBreakpoint;
 		}
 
+		/* Handle vertical line case (both focii have the same y-coordinate */
+		if (leftArcSegment.getY() == rightArcSegment.getY())
+		{
+			double x = (leftArcSegment.getX() + rightArcSegment.getX()) / 2;
+			double y = left.getYFromX(x);/*(((x - leftArcSegment.getX()) * (x - leftArcSegment.getX()))
+					+ (leftArcSegment.getY() * leftArcSegment.getY()) - 1)
+					/ (2 * leftArcSegment.getY() - 1);*/
+			cachedBreakpoint = new Point(x, y);
+			return cachedBreakpoint;
+		}
+
 		double[] intersections = Parabola.intersectionX(left, right);
 
 		/* Choose the correct intersection */

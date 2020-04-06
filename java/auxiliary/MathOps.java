@@ -5,6 +5,8 @@ package auxiliary;
  */
 public class MathOps
 {
+	private static final double EPSILON = 0.00001;
+
 	/**
 	 * Calculates the midpoint of the segment whose endpoints are {@code p1} and {@code p2}.
 	 *
@@ -49,7 +51,7 @@ public class MathOps
 	 */
 	public static Circle circle(Point p1, Point p2, Point p3)
 	{
-		double x = 0, y = 0, radius = 0;
+		double x, y, radius;
 
 		double a13 = 2 * (p1.getX() - p3.getX());
 		double b13 = 2 * (p1.getY() - p3.getY());
@@ -77,5 +79,10 @@ public class MathOps
 		}
 
 		return new Circle(new Point(x, y), radius);
+	}
+
+	public static boolean thresholdEquals(double a, double b)
+	{
+		return Math.abs(a - b) < EPSILON;
 	}
 }

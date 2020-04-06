@@ -196,24 +196,34 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			if (edge.getOrigin() == null)
 			{
 				Point p = edge.getTwin().getOrigin().getCoordinates();
-				double[] lVector = edge.getLineVector().getVector();
+				Point intersection, maxIntersection, minIntersection;
 
-				double tx1 = (min.getX() - p.getX()) * (1 / lVector[0]);
-				double tx2 = (max.getX() - p.getX()) * (1 / lVector[0]);
+				if (edge.getLineVector().isVertical())
+				{
+					maxIntersection = new Point(p.getX(), max.getY());
+					minIntersection = new Point(p.getX(), min.getY());
+				}
+				else
+				{
+					double[] lVector = edge.getLineVector().getVector();
 
-				double tMin = Math.min(tx1, tx2);
-				double tMax = Math.max(tx1, tx2);
+					double tx1 = (min.getX() - p.getX()) * (1 / lVector[0]);
+					double tx2 = (max.getX() - p.getX()) * (1 / lVector[0]);
 
-				double ty1 = (min.getY() - p.getY()) * (1 / lVector[1]);
-				double ty2 = (max.getY() - p.getY()) * (1 / lVector[1]);
+					double tMin = Math.min(tx1, tx2);
+					double tMax = Math.max(tx1, tx2);
 
-				tMin = Math.max(tMin, Math.min(ty1, ty2));
-				tMax = Math.min(tMax, Math.max(ty1, ty2));
+					double ty1 = (min.getY() - p.getY()) * (1 / lVector[1]);
+					double ty2 = (max.getY() - p.getY()) * (1 / lVector[1]);
 
-				Point intersection;
-				Point maxIntersection = new Point((lVector[0] * tMax) + p.getX(), (lVector[1] * tMax) + p.getY());
-				Point minIntersection = new Point((lVector[0] * tMin) + p.getX(), (lVector[1] * tMin) + p.getY());
+					tMin = Math.max(tMin, Math.min(ty1, ty2));
+					tMax = Math.min(tMax, Math.max(ty1, ty2));
 
+					maxIntersection = new Point((lVector[0] * tMax) + p.getX(), (lVector[1] * tMax) + p.getY());
+					minIntersection = new Point((lVector[0] * tMin) + p.getX(), (lVector[1] * tMin) + p.getY());
+				}
+
+				// TODO Not necessarily always the case
 				if (Point.distance(p, maxIntersection) < Point.distance(p, minIntersection))
 					intersection = maxIntersection;
 				else

@@ -25,8 +25,7 @@ public class Parabola
 		double ci = left.c - right.c;
 
 		double discriminant = bi * bi - 4 * ai * ci;
-		double x1, y1;
-		double x2, y2;
+		double x1, x2;
 
 		/* Correct small negative discriminants to 0 */
 		if (discriminant <= 0)

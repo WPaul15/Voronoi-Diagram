@@ -55,8 +55,8 @@ public class Main extends Application
 			primaryStage.setScene(new Scene(root));
 
 			Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
-			visualizer.setScale(minX, maxX, minY, maxY);
-			//visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
+			//visualizer.setScale(minX, maxX, minY, maxY);
+			visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
 			visualizer.plotSiteEvents(sitePoints);
 			visualizer.drawDCEL(voronoiDiagram);
 			primaryStage.show();

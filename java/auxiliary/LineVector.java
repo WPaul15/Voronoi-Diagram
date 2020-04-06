@@ -2,33 +2,51 @@ package auxiliary;
 
 public class LineVector
 {
-	private double slope, yIntercept;
+	private boolean vertical;
+	private double slope, intercept;
 	private double vx, vy;
 
-	private LineVector(double slope, double yIntercept, double vx, double vy)
+	public LineVector(double slope, double yIntercept, double vx, double vy)
 	{
+		this.vertical = false;
 		this.slope = slope;
-		this.yIntercept = yIntercept;
+		this.intercept = yIntercept;
 		this.vx = vx;
 		this.vy = vy;
 	}
 
 	public LineVector(Point p1, Point p2)
 	{
-		this.vx = p1.getX() - p2.getX();
-		this.vy = p1.getY() - p2.getY();
-		this.slope = vy / vx;
-		this.yIntercept = p1.getY() - (slope * p1.getX());
+		this.vertical = p1.getY() == p2.getY();
+
+		if (vertical)
+		{
+			this.vx = 0;
+			this.vy = Double.POSITIVE_INFINITY;
+			this.slope = 0;
+			this.intercept = Point.midpoint(p1, p2).getX();
+		}
+		else
+		{
+			this.vx = p1.getX() - p2.getX();
+			this.vy = p1.getY() - p2.getY();
+			this.slope = vy / vx;
+			this.intercept = p1.getY() - (slope * p1.getX());
+		}
 	}
 
 	public static LineVector perpendicularBisector(Point p1, Point p2)
 	{
-		double vx = -(p1.getX() - p2.getX());
-		double vy = p1.getY() - p2.getY();
-		double m = vx / vy;
-		Point midpoint = Point.midpoint(p1, p2);
-		double b = midpoint.getY() - (m * midpoint.getX());
-		return new LineVector(m, b, vy, vx);
+		if (p1.getY() == p2.getY()) return new LineVector(p1, p2);
+		else
+		{
+			double vx = -(p1.getX() - p2.getX());
+			double vy = p1.getY() - p2.getY();
+			double m = vx / vy;
+			Point midpoint = Point.midpoint(p1, p2);
+			double b = midpoint.getY() - (m * midpoint.getX());
+			return new LineVector(m, b, vy, vx);
+		}
 	}
 
 	public double[] getVector()
@@ -38,37 +56,36 @@ public class LineVector
 
 	public double getYFromX(double x)
 	{
-		return (slope * x) + yIntercept;
+		if (vertical) return x == intercept ? x : Double.POSITIVE_INFINITY;
+		return (slope * x) + intercept;
 	}
 
 	public double getXFromY(double y)
 	{
-		return (y - yIntercept) / slope;
+		if (vertical) return intercept;
+		return (y - intercept) / slope;
+	}
+
+	public boolean isVertical()
+	{
+		return vertical;
 	}
 
 	public double getSlope()
 	{
+		if (vertical) return Double.POSITIVE_INFINITY;
 		return slope;
 	}
 
-	public void setSlope(double slope)
+	public double getIntercept()
 	{
-		this.slope = slope;
-	}
-
-	public double getYIntercept()
-	{
-		return yIntercept;
-	}
-
-	public void setYIntercept(double yIntercept)
-	{
-		this.yIntercept = yIntercept;
+		return intercept;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "y = " + slope + "x " + (yIntercept == 0 ? "" : yIntercept < 0 ? yIntercept : "+ " + yIntercept);
+		if (vertical) return "x = " + intercept;
+		return "y = " + slope + "x " + (intercept == 0 ? "" : intercept < 0 ? intercept : "+ " + intercept);
 	}
 }
