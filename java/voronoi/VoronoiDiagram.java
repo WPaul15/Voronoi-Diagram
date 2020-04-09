@@ -107,14 +107,14 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			if (alpha.getSite().getX() < event.getX())
 			{
 				breakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
-				leftArcSegment = new ArcSegment(alpha.getSite(), null, breakpoint);
-				rightArcSegment = new ArcSegment(event, breakpoint, null);
+				leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), breakpoint);
+				rightArcSegment = new ArcSegment(event, breakpoint, alpha.getRightBreakpoint());
 			}
 			else
 			{
 				breakpoint = new Breakpoint(event, alpha.getSite(), leftEdge);
-				leftArcSegment = new ArcSegment(event, null, breakpoint);
-				rightArcSegment = new ArcSegment(alpha.getSite(), breakpoint, null);
+				leftArcSegment = new ArcSegment(event, alpha.getLeftBreakpoint(), breakpoint);
+				rightArcSegment = new ArcSegment(alpha.getSite(), breakpoint, alpha.getRightBreakpoint());
 			}
 
 			status.put(leftArcSegment, null);
