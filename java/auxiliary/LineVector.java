@@ -2,9 +2,9 @@ package auxiliary;
 
 public class LineVector
 {
-	private boolean vertical;
-	private double slope, intercept;
-	private double vx, vy;
+	private final boolean vertical;
+	private final double slope, intercept;
+	private final double vx, vy;
 
 	public LineVector(double slope, double yIntercept, double vx, double vy)
 	{

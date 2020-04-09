@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class DoublyConnectedEdgeList
 {
-	private List<DCELVertex> vertices;
-	private List<DCELEdge> edges;
-	private List<DCELFace> faces;
+	private final List<DCELVertex> vertices;
+	private final List<DCELEdge> edges;
+	private final List<DCELFace> faces;
 	private BoundingBox boundingBox;
 
 	public DoublyConnectedEdgeList()
@@ -137,7 +137,7 @@ public class DoublyConnectedEdgeList
 		for (DCELVertex vertex : vertices)
 		{
 			if (vertex.isVoronoiVertex())
-				points.add(new Point(vertex.getCoordinates().getX(), vertex.getCoordinates().getY()));
+				points.add(new Point(vertex.getCoordinates()));
 		}
 		return points;
 	}
@@ -180,7 +180,7 @@ public class DoublyConnectedEdgeList
 
 	public static class BoundingBox
 	{
-		private DCELVertex lowerLeft, lowerRight, upperRight, upperLeft;
+		private final DCELVertex lowerLeft, lowerRight, upperRight, upperLeft;
 
 		public BoundingBox(DCELVertex lowerLeft, DCELVertex lowerRight, DCELVertex upperRight, DCELVertex upperLeft)
 		{

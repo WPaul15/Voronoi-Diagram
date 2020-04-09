@@ -17,8 +17,8 @@ import java.util.Set;
 public class Visualizer
 {
 	//private double windowWidth, windowHeight;
-	private double windowWidthMid, windowHeightMid;
-	private GraphicsContext graphicsContext;
+	private final double windowWidthMid, windowHeightMid;
+	private final GraphicsContext graphicsContext;
 	private double scale;
 
 	private final double pointRadius = 6;

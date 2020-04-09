@@ -81,6 +81,13 @@ public class MathOps
 		return new Circle(new Point(x, y), radius);
 	}
 
+	/**
+	 * Compares two {@code double} values to a certain threshold. This compensates for minute rounding errors.
+	 *
+	 * @param a the first {@code double} to compare
+	 * @param b the second {@code double} to compare
+	 * @return true if the difference of the two values is less than a small number; false otherwise
+	 */
 	public static boolean thresholdEquals(double a, double b)
 	{
 		return Math.abs(a - b) < EPSILON;

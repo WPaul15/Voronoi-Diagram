@@ -16,9 +16,9 @@ public class DCELVertex
 	private static int vertexIndex = 0;
 	private static int boundingVertexIndex = 0;
 
-	private int index;
-	private VertexType type;
-	private Point coordinates;
+	private final int index;
+	private final VertexType type;
+	private final Point coordinates;
 	private DCELEdge incidentEdge;
 
 	public DCELVertex(Point coordinates, DCELEdge incidentEdge)

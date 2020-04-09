@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public class Point implements Comparable<Point>
 {
-	private double x, y;
+	private final double x, y;
 
 	public Point(double x, double y)
 	{

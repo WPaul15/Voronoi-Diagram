@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class DCELFace
 {
-	private String name;
+	private final String name;
 	private DCELEdge outerComponent;
 	private List<DCELEdge> innerComponents;
 

@@ -7,7 +7,7 @@ import auxiliary.LineVector;
  */
 public class DCELEdge
 {
-	private String name;
+	private final String name;
 	private DCELVertex origin;
 	private DCELFace incidentFace;
 	private DCELEdge twin, next, prev;

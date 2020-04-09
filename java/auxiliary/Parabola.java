@@ -2,8 +2,8 @@ package auxiliary;
 
 public class Parabola
 {
-	private Point focus;
-	private double a, b, c;
+	private final Point focus;
+	private final double a, b, c;
 
 	public Parabola(Point focus, double directrix)
 	{

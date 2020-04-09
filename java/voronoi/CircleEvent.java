@@ -6,8 +6,8 @@ import voronoi.tree.ArcSegment;
 
 public class CircleEvent extends Point
 {
-	private Circle circle;
-	private ArcSegment disappearingArcSegment;
+	private final Circle circle;
+	private final ArcSegment disappearingArcSegment;
 
 	public CircleEvent(Circle circle, ArcSegment disappearingArcSegment)
 	{

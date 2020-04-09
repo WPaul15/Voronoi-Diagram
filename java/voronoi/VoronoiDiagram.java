@@ -18,15 +18,16 @@ import java.util.*;
  */
 public class VoronoiDiagram extends DoublyConnectedEdgeList
 {
-	private PriorityQueue<Point> queue;
-	private TreeMap<ArcSegment, CircleEvent> status;
+	private static double firstSiteSweepLinePos = Double.MIN_VALUE;
+	private final PriorityQueue<Point> queue;
 
 	private static double sweepLinePos = Double.MIN_VALUE;
+	private final TreeMap<ArcSegment, CircleEvent> status;
 
 	/**
 	 * Constructs a Voronoi diagram from the given set of sites using Steven Fortune's line sweep algorithm.
 	 *
-	 * @param sites The list of sites for which to construct a Voronoi diagram
+	 * @param sites the list of sites for which to construct a Voronoi diagram
 	 */
 	public VoronoiDiagram(Set<Point> sites)
 	{
@@ -36,6 +37,11 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		createVoronoiDiagram();
 	}
 
+	/**
+	 * Returns the current y-position of the sweep line.
+	 *
+	 * @return the current y-position of the sweep line
+	 */
 	public static double getSweepLinePos()
 	{
 		return sweepLinePos;
@@ -47,13 +53,13 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		{
 			Point event = queue.poll();
 			sweepLinePos = event.getY();
+			if (firstSiteSweepLinePos == Double.MIN_VALUE) firstSiteSweepLinePos = event.getY();
 			if (event.getClass() == CircleEvent.class)
 				handleCircleEvent((CircleEvent) event);
 			else
 				handleSiteEvent(event);
 		}
 
-		// TODO Compute bounding box and update DCEL
 		computeBoundingBox();
 		connectInfiniteEdges();
 	}
@@ -79,14 +85,43 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 		DCELEdge leftEdge = new DCELEdge();
 		DCELEdge rightEdge = new DCELEdge(leftEdge);
-
 		this.getEdges().add(leftEdge);
 		this.getEdges().add(rightEdge);
 
+		// To assign directions, check whether the new point is to the left of, to the right of, below, or at the same y-level as alpha's site point
+		// If it's to the left, the left breakpoint moves up and the right moves down
+		// If it's to the right, the left breakpoint moves down and the right moves up
+		// If it's below, the left breakpoint moves left and the right moves right
+		// If it's at the same y-level, pick one to to move down and the other to move up
 		LineVector perpendicularBisector = LineVector.perpendicularBisector(alpha.getSite(), event);
 
 		leftEdge.setLineVector(perpendicularBisector);
 		rightEdge.setLineVector(perpendicularBisector);
+
+		/* Handle case in which the first points have the same y-coordinate */
+		if (sweepLinePos == firstSiteSweepLinePos)// && alpha.getSite().getY() == event.getY())
+		{
+			Breakpoint breakpoint;
+			ArcSegment leftArcSegment, rightArcSegment;
+
+			if (alpha.getSite().getX() < event.getX())
+			{
+				breakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
+				leftArcSegment = new ArcSegment(alpha.getSite(), null, breakpoint);
+				rightArcSegment = new ArcSegment(event, breakpoint, null);
+			}
+			else
+			{
+				breakpoint = new Breakpoint(event, alpha.getSite(), leftEdge);
+				leftArcSegment = new ArcSegment(event, null, breakpoint);
+				rightArcSegment = new ArcSegment(alpha.getSite(), breakpoint, null);
+			}
+
+			status.put(leftArcSegment, null);
+			status.put(rightArcSegment, null);
+
+			return;
+		}
 
 		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
 		Breakpoint newRightBreakpoint = new Breakpoint(event, alpha.getSite(), rightEdge);
@@ -223,7 +258,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 					minIntersection = new Point((lVector[0] * tMin) + p.getX(), (lVector[1] * tMin) + p.getY());
 				}
 
-				// TODO Not necessarily always the case
+				// TODO Not always the case
 				if (Point.distance(p, maxIntersection) < Point.distance(p, minIntersection))
 					intersection = maxIntersection;
 				else
