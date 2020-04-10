@@ -9,21 +9,36 @@ import java.util.List;
  */
 public class DCELFace
 {
-	private final String name;
+	private static int faceindex = 0;
+
+	private final int index;
 	private DCELEdge outerComponent;
 	private List<DCELEdge> innerComponents;
 
-	public DCELFace(int index, DCELEdge outerComponent, DCELEdge... innerComponents)
+	public DCELFace(DCELEdge outerComponent, DCELEdge... innerComponents)
 	{
-		this.name = outerComponent == null ? "uf" : "c" + index;
+		this.index = ++faceindex;
 		this.outerComponent = outerComponent;
 		this.innerComponents = new ArrayList<>();
 		Collections.addAll(this.innerComponents, innerComponents);
 	}
 
+	public DCELFace(int index, DCELEdge outerComponent, DCELEdge... innerComponents)
+	{
+		this.index = index;
+		this.outerComponent = outerComponent;
+		this.innerComponents = new ArrayList<>();
+		Collections.addAll(this.innerComponents, innerComponents);
+	}
+
+	public int getIndex()
+	{
+		return index;
+	}
+
 	public String getName()
 	{
-		return name;
+		return outerComponent == null ? "uf" : "f" + index;
 	}
 
 	public DCELEdge getOuterComponent()
@@ -50,7 +65,7 @@ public class DCELFace
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append(name).append("  ");
+		builder.append(getName()).append("  ");
 
 		if (outerComponent == null) builder.append("nil").append("  ");
 		else builder.append(outerComponent.getName()).append("  ");

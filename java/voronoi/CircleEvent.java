@@ -4,6 +4,9 @@ import auxiliary.Circle;
 import auxiliary.Point;
 import voronoi.tree.ArcSegment;
 
+/**
+ * @author Willem Paul
+ */
 public class CircleEvent extends Point
 {
 	private final Circle circle;

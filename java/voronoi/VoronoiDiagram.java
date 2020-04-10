@@ -1,10 +1,11 @@
 package voronoi;
 
 import auxiliary.Circle;
-import auxiliary.LineVector;
+import auxiliary.Line;
 import auxiliary.MathOps;
 import auxiliary.Point;
 import dcel.DCELEdge;
+import dcel.DCELFace;
 import dcel.DCELVertex;
 import dcel.DoublyConnectedEdgeList;
 import voronoi.tree.ArcSegment;
@@ -18,10 +19,10 @@ import java.util.*;
  */
 public class VoronoiDiagram extends DoublyConnectedEdgeList
 {
-	private static double firstSiteSweepLinePos = Double.MIN_VALUE;
-	private final PriorityQueue<Point> queue;
-
 	private static double sweepLinePos = Double.MIN_VALUE;
+	private static double firstSiteSweepLinePos = Double.MIN_VALUE;
+
+	private final PriorityQueue<Point> queue;
 	private final TreeMap<ArcSegment, CircleEvent> status;
 
 	/**
@@ -29,10 +30,17 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	 *
 	 * @param sites the list of sites for which to construct a Voronoi diagram
 	 */
-	public VoronoiDiagram(Set<Point> sites)
+	public VoronoiDiagram(Set<SiteEvent> sites)
 	{
-		queue = new PriorityQueue<>(sites);
-		status = new TreeMap<>();
+		super();
+
+		this.queue = new PriorityQueue<>(sites);
+		this.status = new TreeMap<>();
+
+		for (SiteEvent site : sites)
+		{
+			faces.add(site.getCell());
+		}
 
 		createVoronoiDiagram();
 	}
@@ -56,63 +64,54 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			if (firstSiteSweepLinePos == Double.MIN_VALUE) firstSiteSweepLinePos = event.getY();
 			if (event.getClass() == CircleEvent.class)
 				handleCircleEvent((CircleEvent) event);
+			else if (event.getClass() == SiteEvent.class)
+				handleSiteEvent((SiteEvent) event);
 			else
-				handleSiteEvent(event);
+				throw new IllegalArgumentException("Non-event element in the queue");
 		}
 
+		// TODO Compute faces
 		computeBoundingBox();
 		connectInfiniteEdges();
+		this.computeFaces();
 	}
 
-	private void handleSiteEvent(Point event)
+	private void handleSiteEvent(SiteEvent event)
 	{
-		/* If the status tree is empty, insert the arc given by the event */
 		if (status.isEmpty())
 		{
 			status.put(new ArcSegment(event), null);
 			return;
 		}
 
-		/* Retrieve the arc directly above the new event */
 		Map.Entry<ArcSegment, CircleEvent> entryAbove = status.floorEntry(new TreeQuery(event));
 		ArcSegment alpha = entryAbove.getKey();
 
-		/* Remove false circle event if it exists */
 		if (entryAbove.getValue() != null) queue.remove(entryAbove.getValue());
 
-		/* Replace the old node in the status tree with a new subtree */
 		status.remove(alpha);
 
-		DCELEdge leftEdge = new DCELEdge();
-		DCELEdge rightEdge = new DCELEdge(leftEdge);
-		this.getEdges().add(leftEdge);
-		this.getEdges().add(rightEdge);
+		DCELEdge edge1 = new DCELEdge();
+		DCELEdge edge2 = new DCELEdge(edge1);
+		edges.add(edge1);
+		edges.add(edge2);
+		calculateLine(edge1, edge2, alpha.getSite(), event);
 
-		// To assign directions, check whether the new point is to the left of, to the right of, below, or at the same y-level as alpha's site point
-		// If it's to the left, the left breakpoint moves up and the right moves down
-		// If it's to the right, the left breakpoint moves down and the right moves up
-		// If it's below, the left breakpoint moves left and the right moves right
-		// If it's at the same y-level, pick one to to move down and the other to move up
-		LineVector perpendicularBisector = LineVector.perpendicularBisector(alpha.getSite(), event);
-
-		leftEdge.setLineVector(perpendicularBisector);
-		rightEdge.setLineVector(perpendicularBisector);
-
-		/* Handle case in which the first points have the same y-coordinate */
-		if (sweepLinePos == firstSiteSweepLinePos)// && alpha.getSite().getY() == event.getY())
+		/* Handle case in which multiple points have the same y-coordinate as the first */
+		if (sweepLinePos == firstSiteSweepLinePos)
 		{
 			Breakpoint breakpoint;
 			ArcSegment leftArcSegment, rightArcSegment;
 
 			if (alpha.getSite().getX() < event.getX())
 			{
-				breakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
+				breakpoint = new Breakpoint(alpha.getSite(), event, edge1);
 				leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), breakpoint);
 				rightArcSegment = new ArcSegment(event, breakpoint, alpha.getRightBreakpoint());
 			}
 			else
 			{
-				breakpoint = new Breakpoint(event, alpha.getSite(), leftEdge);
+				breakpoint = new Breakpoint(event, alpha.getSite(), edge1);
 				leftArcSegment = new ArcSegment(event, alpha.getLeftBreakpoint(), breakpoint);
 				rightArcSegment = new ArcSegment(alpha.getSite(), breakpoint, alpha.getRightBreakpoint());
 			}
@@ -123,8 +122,94 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			return;
 		}
 
-		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, leftEdge);
-		Breakpoint newRightBreakpoint = new Breakpoint(event, alpha.getSite(), rightEdge);
+		Breakpoint newLeftBreakpoint = new Breakpoint(alpha.getSite(), event);
+		Breakpoint newRightBreakpoint = new Breakpoint(event, alpha.getSite());
+
+		if (newLeftBreakpoint.isMovingRight())
+		{
+			if (edge1.isDirectedRight())
+			{
+				newLeftBreakpoint.setTracedEdge(edge1);
+				newRightBreakpoint.setTracedEdge(edge2);
+
+				edge1.setIncidentFace(event.getCell());
+				edge2.setIncidentFace(alpha.getSite().getCell());
+
+				event.getCell().setOuterComponent(edge1);
+				alpha.getSite().getCell().setOuterComponent(edge2);
+			}
+			else
+			{
+				newRightBreakpoint.setTracedEdge(edge1);
+				newLeftBreakpoint.setTracedEdge(edge2);
+
+				edge1.setIncidentFace(alpha.getSite().getCell());
+				edge2.setIncidentFace(event.getCell());
+
+				event.getCell().setOuterComponent(edge2);
+				alpha.getSite().getCell().setOuterComponent(edge1);
+			}
+		}
+		else
+		{
+			if (edge1.isDirectedRight())
+			{
+				newLeftBreakpoint.setTracedEdge(edge2);
+				newRightBreakpoint.setTracedEdge(edge1);
+
+				edge1.setIncidentFace(alpha.getSite().getCell());
+				edge2.setIncidentFace(event.getCell());
+
+				event.getCell().setOuterComponent(edge2);
+				alpha.getSite().getCell().setOuterComponent(edge1);
+			}
+			else
+			{
+				newRightBreakpoint.setTracedEdge(edge2);
+				newLeftBreakpoint.setTracedEdge(edge1);
+
+				edge1.setIncidentFace(event.getCell());
+				edge2.setIncidentFace(alpha.getSite().getCell());
+
+				event.getCell().setOuterComponent(edge1);
+				alpha.getSite().getCell().setOuterComponent(edge2);
+			}
+		}
+
+//		if (event.getY() != alpha.getSite().getY())
+//		{
+//			if (event.getX() < alpha.getSite().getX()) // If it's to the left, the left breakpoint moves up and the right moves down
+//			{
+//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge2);
+//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge1);
+//			}
+//			else if (event.getX() > alpha.getSite().getX()) // If it's to the right, the left breakpoint moves down and the right moves up
+//			{
+//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
+//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
+//			}
+//			else // If it's below, the left breakpoint moves left and the right moves right
+//			{
+//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
+//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
+//			}
+//		}
+//		else // If it's at the same y-level, pick one to to move down and the other to move up
+//		{
+//			newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
+//			newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
+//		}
+
+		//newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
+		//newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
+
+//		VoronoiCell face1 = new VoronoiCell(alpha.getSite(), alpha.getSite().getIndex(), edge1);
+//		VoronoiCell face2 = new VoronoiCell(event, event.getIndex(), edge2);
+//		faces.add(face1);
+//		faces.add(face2);
+//
+//		edge1.setIncidentFace(face1);
+//		edge2.setIncidentFace(face2);
 
 		ArcSegment leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
 		ArcSegment centerArcSegment = new ArcSegment(event, newLeftBreakpoint, newRightBreakpoint);
@@ -134,7 +219,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		status.put(centerArcSegment, null);
 		status.put(rightArcSegment, null);
 
-		/* Check for possible circle events with the left and right neighbors */
 		checkForCircleEvent(leftArcSegment);
 		checkForCircleEvent(rightArcSegment);
 	}
@@ -142,8 +226,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	private void handleCircleEvent(CircleEvent event)
 	{
 		ArcSegment alpha = event.getDisappearingArcSegment();
-
-		/* Remove the arc segment from the status tree and update the breakpoints of the left and right neighbors */
 		status.remove(alpha);
 
 		Map.Entry<ArcSegment, CircleEvent> leftEntry = status.lowerEntry(alpha);
@@ -155,41 +237,34 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		Breakpoint oldLeftBreakpoint = leftNeighbor.getRightBreakpoint();
 		Breakpoint oldRightBreakpoint = rightNeighbor.getLeftBreakpoint();
 
-		DCELEdge leftEdge = new DCELEdge();
-		DCELEdge rightEdge = new DCELEdge(leftEdge);
+		DCELEdge edge1 = new DCELEdge();
+		DCELEdge edge2 = new DCELEdge(edge1);
+		edges.add(edge1);
+		edges.add(edge2);
+		calculateLine(edge1, edge2, leftNeighbor.getSite(), rightNeighbor.getSite());
 
-		this.getEdges().add(leftEdge);
-		this.getEdges().add(rightEdge);
-
-		LineVector perpendicularBisector = LineVector.perpendicularBisector(leftNeighbor.getSite(), rightNeighbor.getSite());
-
-		leftEdge.setLineVector(perpendicularBisector);
-		rightEdge.setLineVector(perpendicularBisector);
-
-		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), leftEdge);
+		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), edge1);
 
 		leftNeighbor.setRightBreakpoint(newBreakpoint);
 		rightNeighbor.setLeftBreakpoint(newBreakpoint);
 
-		/* Delete any other circle events involving alpha */
 		if (leftEntry.getValue() != null) queue.remove(leftEntry.getValue());
 		if (rightEntry.getValue() != null) queue.remove(rightEntry.getValue());
 
-		/* Add a new Voronoi vertex and update the edges incident on it */
-		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), leftEdge);
-		this.getVertices().add(vertex);
+		DCELVertex vertex = new DCELVertex(event.getCircle().getCenter(), edge1);
+		vertices.add(vertex);
 
 		oldRightBreakpoint.getTracedEdge().getTwin().setOrigin(vertex);
 		oldLeftBreakpoint.getTracedEdge().getTwin().setOrigin(vertex);
-		leftEdge.setOrigin(vertex);
+		edge1.setOrigin(vertex);
 
 		oldRightBreakpoint.getTracedEdge().getTwin().setPrev(oldLeftBreakpoint.getTracedEdge());
-		oldLeftBreakpoint.getTracedEdge().getTwin().setPrev(rightEdge);
-		leftEdge.setPrev(oldRightBreakpoint.getTracedEdge());
+		oldLeftBreakpoint.getTracedEdge().getTwin().setPrev(edge2);
+		edge1.setPrev(oldRightBreakpoint.getTracedEdge());
 
-		oldRightBreakpoint.getTracedEdge().setNext(leftEdge);
+		oldRightBreakpoint.getTracedEdge().setNext(edge1);
 		oldLeftBreakpoint.getTracedEdge().setNext(oldRightBreakpoint.getTracedEdge().getTwin());
-		rightEdge.setNext(oldLeftBreakpoint.getTracedEdge().getTwin());
+		edge2.setNext(oldLeftBreakpoint.getTracedEdge().getTwin());
 
 		checkForCircleEvent(leftNeighbor);
 		checkForCircleEvent(rightNeighbor);
@@ -226,36 +301,36 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 		ArrayList<DCELEdge> toAdd = new ArrayList<>();
 
-		for (DCELEdge edge : this.getEdges())
+		for (DCELEdge edge : edges)
 		{
 			if (edge.getOrigin() == null)
 			{
 				Point p = edge.getTwin().getOrigin().getCoordinates();
 				Point intersection, maxIntersection, minIntersection;
 
-				if (edge.getLineVector().isVertical())
+				if (edge.getLine().isVertical())
 				{
 					maxIntersection = new Point(p.getX(), max.getY());
 					minIntersection = new Point(p.getX(), min.getY());
 				}
 				else
 				{
-					double[] lVector = edge.getLineVector().getVector();
+					double[] vector = edge.getDirection();
 
-					double tx1 = (min.getX() - p.getX()) * (1 / lVector[0]);
-					double tx2 = (max.getX() - p.getX()) * (1 / lVector[0]);
+					double tx1 = (min.getX() - p.getX()) * (1 / vector[0]);
+					double tx2 = (max.getX() - p.getX()) * (1 / vector[0]);
 
 					double tMin = Math.min(tx1, tx2);
 					double tMax = Math.max(tx1, tx2);
 
-					double ty1 = (min.getY() - p.getY()) * (1 / lVector[1]);
-					double ty2 = (max.getY() - p.getY()) * (1 / lVector[1]);
+					double ty1 = (min.getY() - p.getY()) * (1 / vector[1]);
+					double ty2 = (max.getY() - p.getY()) * (1 / vector[1]);
 
 					tMin = Math.max(tMin, Math.min(ty1, ty2));
 					tMax = Math.min(tMax, Math.max(ty1, ty2));
 
-					maxIntersection = new Point((lVector[0] * tMax) + p.getX(), (lVector[1] * tMax) + p.getY());
-					minIntersection = new Point((lVector[0] * tMin) + p.getX(), (lVector[1] * tMin) + p.getY());
+					maxIntersection = new Point((vector[0] * tMax) + p.getX(), (vector[1] * tMax) + p.getY());
+					minIntersection = new Point((vector[0] * tMin) + p.getX(), (vector[1] * tMin) + p.getY());
 				}
 
 				// TODO Not always the case
@@ -265,7 +340,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 					intersection = minIntersection;
 
 				DCELVertex vertex = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection, edge);
-				this.getVertices().add(vertex);
+				vertices.add(vertex);
 
 				DCELEdge outerBoundingEdge = getBoundingBox().getIntersectedEdge(intersection);
 				DCELEdge innerBoundingEdge = outerBoundingEdge.getTwin();
@@ -295,6 +370,38 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			}
 		}
 
-		getEdges().addAll(toAdd);
+		edges.addAll(toAdd);
+	}
+
+	private void calculateLine(DCELEdge edge1, DCELEdge edge2, Point p1, Point p2)
+	{
+		Line perpendicularBisector = Line.perpendicularBisector(p1, p2);
+		double vy = -(p1.getX() - p2.getX());
+		double vx = p1.getY() - p2.getY();
+
+		edge1.setLine(perpendicularBisector);
+		edge2.setLine(perpendicularBisector);
+
+		edge1.setDirection(new double[]{vx, vy});
+		edge2.setDirection(new double[]{-vx, -vy});
+	}
+
+	@Override
+	protected void computeFaces()
+	{
+		for (DCELEdge edge : edges)
+		{
+			if (edge.getIncidentFace() != null && edge.getIncidentFace().getOuterComponent() != null)
+			{
+				DCELEdge e = edge.getNext();
+				DCELFace face = edge.getIncidentFace();
+
+				while (e != edge)
+				{
+					e.setIncidentFace(face);
+					e = e.getNext();
+				}
+			}
+		}
 	}
 }

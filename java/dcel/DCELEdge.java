@@ -1,6 +1,6 @@
 package dcel;
 
-import auxiliary.LineVector;
+import auxiliary.Line;
 
 /**
  * @author Willem Paul
@@ -13,7 +13,8 @@ public class DCELEdge
 	private DCELEdge twin, next, prev;
 
 	/* Store the line along which this edge lies for easier calculations later */
-	private LineVector lineVector;
+	private Line line;
+	private double[] direction;
 
 	/**
 	 * Constructs a new DCEL edge.
@@ -26,6 +27,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+		this.line = null;
+		this.direction = new double[2];
 	}
 
 	public DCELEdge(DCELVertex origin)
@@ -36,6 +39,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+		this.line = null;
+		this.direction = new double[2];
 	}
 
 	/**
@@ -52,6 +57,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+		this.line = null;
+		this.direction = new double[2];
 
 		twin.twin = this;
 	}
@@ -64,6 +71,8 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
+		this.line = null;
+		this.direction = new double[2];
 
 		twin.twin = this;
 	}
@@ -73,6 +82,11 @@ public class DCELEdge
 		return origin.isVoronoiVertex() || twin.origin.isVoronoiVertex();
 	}
 
+	public boolean isDirectedRight()
+	{
+		return direction[0] > 0;
+	}
+
 	public String getName()
 	{
 		if (name.equals(""))
@@ -80,7 +94,7 @@ public class DCELEdge
 			StringBuilder builder = new StringBuilder();
 			//builder.append('e');
 
-			// For testing purposes; helps differentiate between the edges of the diagram and the edges along the bounding box
+			// For testing purposes, differentiate between the edges of the diagram and the edges along the bounding box
 			if (origin != null && twin.origin != null)
 			{
 				if (isVoronoiEdge())
@@ -147,14 +161,24 @@ public class DCELEdge
 		this.prev = prev;
 	}
 
-	public LineVector getLineVector()
+	public Line getLine()
 	{
-		return lineVector;
+		return line;
 	}
 
-	public void setLineVector(LineVector lineVector)
+	public void setLine(Line line)
 	{
-		this.lineVector = lineVector;
+		this.line = line;
+	}
+
+	public double[] getDirection()
+	{
+		return direction;
+	}
+
+	public void setDirection(double[] direction)
+	{
+		this.direction = direction;
 	}
 
 	@Override

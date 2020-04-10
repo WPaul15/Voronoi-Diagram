@@ -1,28 +1,28 @@
 package auxiliary;
 
-public class LineVector
+public class Line
 {
 	private final boolean vertical;
 	private final double slope, intercept;
-	private final double vx, vy;
+	//private double vx, vy;
 
-	public LineVector(double slope, double yIntercept, double vx, double vy)
+	public Line(double slope, double yIntercept)//double vx, double vy)
 	{
-		this.vertical = false;
+		this.vertical = slope == Double.POSITIVE_INFINITY;
 		this.slope = slope;
 		this.intercept = yIntercept;
-		this.vx = vx;
-		this.vy = vy;
+		//this.vx = vx;
+		//this.vy = vy;
 	}
 
-	public LineVector(Point p1, Point p2)
+	/*public Line(Point p1, Point p2)
 	{
 		this.vertical = p1.getY() == p2.getY();
 
 		if (vertical)
 		{
-			this.vx = 0;
-			this.vy = Double.POSITIVE_INFINITY;
+			//this.vx = 0;
+			//this.vy = Double.POSITIVE_INFINITY;
 			this.slope = 0;
 			this.intercept = Point.midpoint(p1, p2).getX();
 		}
@@ -33,26 +33,26 @@ public class LineVector
 			this.slope = vy / vx;
 			this.intercept = p1.getY() - (slope * p1.getX());
 		}
-	}
+	}*/
 
-	public static LineVector perpendicularBisector(Point p1, Point p2)
+	public static Line perpendicularBisector(Point p1, Point p2)
 	{
-		if (p1.getY() == p2.getY()) return new LineVector(p1, p2);
+		if (p1.getY() == p2.getY()) return new Line(Point.midpoint(p1, p2).getX(), Double.POSITIVE_INFINITY);
 		else
 		{
-			double vx = -(p1.getX() - p2.getX());
-			double vy = p1.getY() - p2.getY();
-			double m = vx / vy;
+			//double vx = -(p1.getX() - p2.getX());
+			//double vy = p1.getY() - p2.getY();
+			double m = -(p1.getX() - p2.getX()) / (p1.getY() - p2.getY());
 			Point midpoint = Point.midpoint(p1, p2);
 			double b = midpoint.getY() - (m * midpoint.getX());
-			return new LineVector(m, b, vy, vx);
+			return new Line(m, b);//, vy, vx);
 		}
 	}
 
-	public double[] getVector()
+	/*public double[] getVector()
 	{
 		return new double[]{vx, vy};
-	}
+	}*/
 
 	public double getYFromX(double x)
 	{

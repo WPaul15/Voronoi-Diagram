@@ -10,11 +10,20 @@ import voronoi.VoronoiDiagram;
  */
 public class Breakpoint
 {
-	private Point leftArcSegment, rightArcSegment;
+	private final Point leftArcSegment, rightArcSegment;
 	private DCELEdge tracedEdge;
 
 	private double cachedSweepLinePos;
 	private Point cachedBreakpoint;
+
+	public Breakpoint(Point leftArcSegment, Point rightArcSegment)
+	{
+		this.leftArcSegment = leftArcSegment;
+		this.rightArcSegment = rightArcSegment;
+		this.tracedEdge = null;
+		cachedSweepLinePos = Double.MIN_VALUE;
+		cachedBreakpoint = null;
+	}
 
 	public Breakpoint(Point leftArcSegment, Point rightArcSegment, DCELEdge tracedEdge)
 	{
@@ -40,16 +49,16 @@ public class Breakpoint
 
 		cachedSweepLinePos = currentSweepLinePos;
 
-		Parabola left = new Parabola(leftArcSegment, currentSweepLinePos);
-		Parabola right = new Parabola(rightArcSegment, currentSweepLinePos);
+		Parabola left = new Parabola(leftArcSegment, cachedSweepLinePos);
+		Parabola right = new Parabola(rightArcSegment, cachedSweepLinePos);
 
 		/* Handle new site point case (degenerate parabola) */
-		if (leftArcSegment.getY() == currentSweepLinePos)
+		if (leftArcSegment.getY() == cachedSweepLinePos)
 		{
 			cachedBreakpoint = new Point(leftArcSegment.getX(), right.getYFromX(leftArcSegment.getX()));
 			return cachedBreakpoint;
 		}
-		else if (rightArcSegment.getY() == currentSweepLinePos)
+		else if (rightArcSegment.getY() == cachedSweepLinePos)
 		{
 			cachedBreakpoint = new Point(rightArcSegment.getX(), left.getYFromX(rightArcSegment.getX()));
 			return cachedBreakpoint;
@@ -59,9 +68,7 @@ public class Breakpoint
 		if (leftArcSegment.getY() == rightArcSegment.getY())
 		{
 			double x = (leftArcSegment.getX() + rightArcSegment.getX()) / 2;
-			double y = left.getYFromX(x);/*(((x - leftArcSegment.getX()) * (x - leftArcSegment.getX()))
-					+ (leftArcSegment.getY() * leftArcSegment.getY()) - 1)
-					/ (2 * leftArcSegment.getY() - 1);*/
+			double y = left.getYFromX(x);
 			cachedBreakpoint = new Point(x, y);
 			return cachedBreakpoint;
 		}
@@ -77,6 +84,11 @@ public class Breakpoint
 		return cachedBreakpoint;
 	}
 
+	public boolean isMovingRight()
+	{
+		return leftArcSegment.getY() < rightArcSegment.getY();
+	}
+
 	public Point getLeftArcSegment()
 	{
 		return leftArcSegment;
@@ -90,5 +102,10 @@ public class Breakpoint
 	public DCELEdge getTracedEdge()
 	{
 		return tracedEdge;
+	}
+
+	public void setTracedEdge(DCELEdge tracedEdge)
+	{
+		this.tracedEdge = tracedEdge;
 	}
 }

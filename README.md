@@ -1,6 +1,6 @@
 # Voronoi-Diagram
 ## About
-This is a project for COM S 418: Computational Geometry. Given any number of points, it will generate and display the Voronoi diagram of the points using Steven Fortune's lineVector sweep algorithm.
+This is a project for COM S 418: Computational Geometry. Given any number of points, it will generate and display the Voronoi diagram of the points using Steven Fortune's line sweep algorithm.
 
 ## Input
 The input file (`sites.txt` by default) must contain (x, y) coordinate pairs separated by either a space or a newline.

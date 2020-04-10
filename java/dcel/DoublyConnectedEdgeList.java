@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class DoublyConnectedEdgeList
 {
-	private final List<DCELVertex> vertices;
-	private final List<DCELEdge> edges;
-	private final List<DCELFace> faces;
+	protected final List<DCELVertex> vertices;
+	protected final List<DCELEdge> edges;
+	protected final List<DCELFace> faces;
 	private BoundingBox boundingBox;
 
 	public DoublyConnectedEdgeList()
@@ -109,6 +109,29 @@ public class DoublyConnectedEdgeList
 		leftOuter.setPrev(bottomOuter);
 
 		this.boundingBox = new BoundingBox(b1, b2, b3, b4);
+	}
+
+	protected void computeFaces()
+	{
+		int index = 0;
+
+		for (DCELEdge edge : edges)
+		{
+			if (edge.getIncidentFace() == null)
+			{
+				DCELFace face = new DCELFace(++index, edge);
+				faces.add(face);
+
+				edge.setIncidentFace(face);
+
+				DCELEdge e = edge.getNext();
+				while (e != edge)
+				{
+					e.setIncidentFace(face);
+					e = e.getNext();
+				}
+			}
+		}
 	}
 
 	public List<DCELVertex> getVertices()

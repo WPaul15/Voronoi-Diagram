@@ -1,15 +1,16 @@
 package voronoi.tree;
 
 import auxiliary.Point;
+import voronoi.SiteEvent;
 
 /**
  * @author Willem Paul
  */
 public class TreeQuery extends ArcSegment
 {
-	private Point site;
+	private final SiteEvent site;
 
-	public TreeQuery(Point site)
+	public TreeQuery(SiteEvent site)
 	{
 		super(site);
 		this.site = site;

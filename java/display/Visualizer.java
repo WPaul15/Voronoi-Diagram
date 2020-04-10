@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class Visualizer
 {
-	//private double windowWidth, windowHeight;
+	private final double windowWidth, windowHeight;
 	private final double windowWidthMid, windowHeightMid;
 	private final GraphicsContext graphicsContext;
 	private double scale;
@@ -26,20 +26,20 @@ public class Visualizer
 	// TODO Make sure all DCEL vertices are visible
 	public Visualizer(double windowWidth, double windowHeight, GraphicsContext graphicsContext)
 	{
-		//this.windowWidth = windowWidth;
-		//this.windowHeight = windowHeight;
+		this.windowWidth = windowWidth;
+		this.windowHeight = windowHeight;
 		this.windowWidthMid = windowWidth / 2;
 		this.windowHeightMid = windowHeight / 2;
 		this.graphicsContext = graphicsContext;
 	}
 
-	public void plotSiteEvents(Set<Point> sitePoints)
+	public void plotSiteEvents(Set<? extends Point> sitePoints)
 	{
 		graphicsContext.setFill(Color.RED);
 
-		for (Point point : sitePoints)
+		for (Point site : sitePoints)
 		{
-			Point2D scaledPoint = scalePoint(point);
+			Point2D scaledPoint = scalePoint(site);
 			graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);
 		}
 	}
@@ -51,17 +51,39 @@ public class Visualizer
 		graphicsContext.setLineWidth(pointRadius / 3);
 
 		// TODO Prevent each edge from being drawn twice
+		// TODO Extend unbounded edges to edge of window regardless of bounding box size
 		for (DCELEdge edge : dcel.getEdges())
 		{
 			/* Don't display bounding box edges; they aren't visible anyway */
-			if ((edge.getOrigin() != null && edge.getTwin().getOrigin() != null) && edge.isVoronoiEdge())
+			if (/*(edge.getOrigin() != null && edge.getTwin().getOrigin() != null) && */edge.isVoronoiEdge())
 			{
-				Point2D scaledOrigin = scalePoint(edge.getOrigin().getCoordinates());
-				Point2D scaledTwinOrigin = scalePoint(edge.getTwin().getOrigin().getCoordinates());
-				graphicsContext.strokeLine(scaledOrigin.getX() + (pointRadius / 2),
-				                           scaledOrigin.getY() + (pointRadius / 2),
-				                           scaledTwinOrigin.getX() + (pointRadius / 2),
-				                           scaledTwinOrigin.getY() + (pointRadius / 2));
+				Point2D lineStart, lineEnd;
+
+				/*if (edge.getOrigin().isVoronoiVertex() && edge.getTwin().getOrigin().isVoronoiVertex())
+				{*/
+				lineStart = scalePoint(edge.getOrigin().getCoordinates());
+				lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
+				//}
+				/*else if (!edge.getOrigin().isVoronoiVertex())
+				{
+					double x = edge.getLineVector().getXFromY(windowHeight);
+					Point p = new Point();
+
+					lineStart = scalePoint(p);
+					lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
+				}
+				else
+				{
+					Point p = new Point();
+
+					lineStart = scalePoint(edge.getOrigin().getCoordinates());
+					lineEnd = scalePoint(p);
+				}*/
+
+				graphicsContext.strokeLine(lineStart.getX() + (pointRadius / 2),
+				                           lineStart.getY() + (pointRadius / 2),
+				                           lineEnd.getX() + (pointRadius / 2),
+				                           lineEnd.getY() + (pointRadius / 2));
 			}
 		}
 
