@@ -70,7 +70,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				throw new IllegalArgumentException("Non-event element in the queue");
 		}
 
-		// TODO Compute faces
 		computeBoundingBox();
 		connectInfiniteEdges();
 		this.computeFaces();
@@ -175,41 +174,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				alpha.getSite().getCell().setOuterComponent(edge2);
 			}
 		}
-
-//		if (event.getY() != alpha.getSite().getY())
-//		{
-//			if (event.getX() < alpha.getSite().getX()) // If it's to the left, the left breakpoint moves up and the right moves down
-//			{
-//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge2);
-//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge1);
-//			}
-//			else if (event.getX() > alpha.getSite().getX()) // If it's to the right, the left breakpoint moves down and the right moves up
-//			{
-//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
-//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
-//			}
-//			else // If it's below, the left breakpoint moves left and the right moves right
-//			{
-//				newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
-//				newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
-//			}
-//		}
-//		else // If it's at the same y-level, pick one to to move down and the other to move up
-//		{
-//			newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
-//			newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
-//		}
-
-		//newLeftBreakpoint = new Breakpoint(alpha.getSite(), event, edge1);
-		//newRightBreakpoint = new Breakpoint(event, alpha.getSite(), edge2);
-
-//		VoronoiCell face1 = new VoronoiCell(alpha.getSite(), alpha.getSite().getIndex(), edge1);
-//		VoronoiCell face2 = new VoronoiCell(event, event.getIndex(), edge2);
-//		faces.add(face1);
-//		faces.add(face2);
-//
-//		edge1.setIncidentFace(face1);
-//		edge2.setIncidentFace(face2);
 
 		ArcSegment leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), newLeftBreakpoint);
 		ArcSegment centerArcSegment = new ArcSegment(event, newLeftBreakpoint, newRightBreakpoint);
