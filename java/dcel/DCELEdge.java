@@ -1,7 +1,5 @@
 package dcel;
 
-import auxiliary.Line;
-
 /**
  * @author Willem Paul
  */
@@ -12,8 +10,7 @@ public class DCELEdge
 	private DCELFace incidentFace;
 	private DCELEdge twin, next, prev;
 
-	/* Store the line along which this edge lies for easier calculations later */
-	private Line line;
+	/* Store the vector representing the edge's direction for easier calculations later */
 	private double[] direction;
 
 	/**
@@ -27,7 +24,6 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
-		this.line = null;
 		this.direction = new double[2];
 	}
 
@@ -39,7 +35,6 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
-		this.line = null;
 		this.direction = new double[2];
 	}
 
@@ -57,7 +52,6 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
-		this.line = null;
 		this.direction = new double[2];
 
 		twin.twin = this;
@@ -71,7 +65,6 @@ public class DCELEdge
 		this.incidentFace = null;
 		this.next = null;
 		this.prev = null;
-		this.line = null;
 		this.direction = new double[2];
 
 		twin.twin = this;
@@ -85,6 +78,20 @@ public class DCELEdge
 	public boolean isDirectedRight()
 	{
 		return direction[0] > 0;
+	}
+
+	public static void setTwinPair(DCELEdge edge1, DCELEdge edge2)
+	{
+		edge1.twin = edge2;
+		edge2.twin = edge1;
+	}
+
+	public boolean isDirectedUp()
+	{
+		if (direction[0] == 0)
+			return direction[1] > 0;
+
+		return false;
 	}
 
 	public String getName()
@@ -159,16 +166,6 @@ public class DCELEdge
 	public void setPrev(DCELEdge prev)
 	{
 		this.prev = prev;
-	}
-
-	public Line getLine()
-	{
-		return line;
-	}
-
-	public void setLine(Line line)
-	{
-		this.line = line;
 	}
 
 	public double[] getDirection()

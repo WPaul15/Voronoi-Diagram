@@ -213,6 +213,38 @@ public class DoublyConnectedEdgeList
 			this.upperLeft = upperLeft;
 		}
 
+		public Point getIntersection(Point origin, double[] direction)
+		{
+			/* Handle vertical and horizontal lines */
+			if (direction[0] == 0)
+				return direction[1] > 0 ? new Point(origin.getX(), upperRight.getCoordinates().getY()) : new Point(origin.getX(), lowerLeft.getCoordinates().getY());
+			else if (direction[1] == 0)
+				return direction[0] > 0 ? new Point(upperRight.getCoordinates().getX(), origin.getY()) : new Point(lowerLeft.getCoordinates().getX(), origin.getY());
+
+			double t = 0, newT = 0;
+			Point intersection;
+
+			if (direction[0] > 0)
+				t = (upperRight.getCoordinates().getX() - origin.getX()) / direction[0];
+			else if (direction[0] < 0)
+				t = (lowerLeft.getCoordinates().getX() - origin.getX()) / direction[0];
+
+			intersection = new Point(origin.getX() + t * direction[0], origin.getY() + t * direction[1]);
+
+			if (direction[1] > 0)
+				newT = (upperRight.getCoordinates().getY() - origin.getY()) / direction[1];
+			else if (direction[1] < 0)
+				newT = (lowerLeft.getCoordinates().getY() - origin.getY()) / direction[1];
+
+			if (newT < t)
+			{
+				intersection.setX(origin.getX() + newT * direction[0]);
+				intersection.setY(origin.getY() + newT * direction[1]);
+			}
+
+			return intersection;
+		}
+
 		public DCELEdge getIntersectedEdge(Point p)
 		{
 			double x = p.getX();
@@ -243,7 +275,7 @@ public class DoublyConnectedEdgeList
 			if (MathOps.thresholdEquals(y, lowerLeft.getCoordinates().getY()))
 			{
 				DCELEdge edge = lowerRight.getIncidentEdge();
-				while (x < edge.getTwin().getOrigin().getCoordinates().getY())
+				while (x < edge.getTwin().getOrigin().getCoordinates().getX())
 				{
 					edge = edge.getNext();
 				}
@@ -253,7 +285,7 @@ public class DoublyConnectedEdgeList
 			else if (MathOps.thresholdEquals(y, upperRight.getCoordinates().getY()))
 			{
 				DCELEdge edge = upperLeft.getIncidentEdge();
-				while (x > edge.getTwin().getOrigin().getCoordinates().getY())
+				while (x > edge.getTwin().getOrigin().getCoordinates().getX())
 				{
 					edge = edge.getNext();
 				}
@@ -261,16 +293,6 @@ public class DoublyConnectedEdgeList
 			}
 
 			return null;
-		}
-
-		public DCELVertex getLowerLeft()
-		{
-			return lowerLeft;
-		}
-
-		public DCELVertex getUpperRight()
-		{
-			return upperRight;
 		}
 	}
 }

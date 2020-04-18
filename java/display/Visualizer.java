@@ -55,30 +55,12 @@ public class Visualizer
 		for (DCELEdge edge : dcel.getEdges())
 		{
 			/* Don't display bounding box edges; they aren't visible anyway */
-			if (/*(edge.getOrigin() != null && edge.getTwin().getOrigin() != null) && */edge.isVoronoiEdge())
+			if (edge.isVoronoiEdge())
 			{
 				Point2D lineStart, lineEnd;
 
-				/*if (edge.getOrigin().isVoronoiVertex() && edge.getTwin().getOrigin().isVoronoiVertex())
-				{*/
 				lineStart = scalePoint(edge.getOrigin().getCoordinates());
 				lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
-				//}
-				/*else if (!edge.getOrigin().isVoronoiVertex())
-				{
-					double x = edge.getLineVector().getXFromY(windowHeight);
-					Point p = new Point();
-
-					lineStart = scalePoint(p);
-					lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
-				}
-				else
-				{
-					Point p = new Point();
-
-					lineStart = scalePoint(edge.getOrigin().getCoordinates());
-					lineEnd = scalePoint(p);
-				}*/
 
 				graphicsContext.strokeLine(lineStart.getX() + (pointRadius / 2),
 				                           lineStart.getY() + (pointRadius / 2),

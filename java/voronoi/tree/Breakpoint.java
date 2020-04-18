@@ -34,12 +34,6 @@ public class Breakpoint
 		cachedBreakpoint = null;
 	}
 
-	/**
-	 * Calculates the x-coordinate of the breakpoint. All {@code Point} objects returned by this method have a
-	 * y-coordinate of 0, as the y-coordinate is irrelevant to searching the status tree.
-	 *
-	 * @return A {@code Point} representing the x-coordinate of the breakpoint.
-	 */
 	public Point getCoordinates()
 	{
 		/* If the sweep line is at the same position, there's no need to recalculate the breakpoint */

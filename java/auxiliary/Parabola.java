@@ -27,7 +27,7 @@ public class Parabola
 		double discriminant = bi * bi - 4 * ai * ci;
 		double x1, x2;
 
-		/* Correct small negative discriminants to 0 */
+		/* Correct small negative discriminants to 0. In this case, there is only one intersection. */
 		if (discriminant <= 0)
 		{
 			x1 = -bi / (2 * ai);
@@ -45,20 +45,5 @@ public class Parabola
 	public double getYFromX(double x)
 	{
 		return (a * x * x) + (b * x) + c;
-	}
-
-	public double getA()
-	{
-		return a;
-	}
-
-	public double getB()
-	{
-		return b;
-	}
-
-	public double getC()
-	{
-		return c;
 	}
 }
