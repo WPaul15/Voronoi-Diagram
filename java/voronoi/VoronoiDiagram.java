@@ -299,54 +299,96 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		}
 	}
 
-	// TODO Handle collinear site points case
 	// TODO Handle case where edge intersects a corner of the bounding box
 	private void connectInfiniteEdges()
 	{
+		/* If there are exactly four vertices, they are the corners of the bounding box and there are no Voronoi
+		   vertices */
+		boolean noVertices = vertices.size() == 4;
+
 		for (Breakpoint breakpoint : breakpoints)
 		{
 			DCELEdge edge = breakpoint.getTracedEdge();
 			Point origin;
 
-			if (edge.getOrigin() != null)
-				origin = edge.getOrigin().getCoordinates();
+			// TODO Handle collinear site points case
+			if (noVertices)
+			{
+				if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null) continue;
+
+				origin = MathOps.midpoint(breakpoint.getLeftArcSegment(), breakpoint.getRightArcSegment());
+
+				Point intersection1 = getBoundingBox().getIntersection(origin, edge.getDirection());
+				Point intersection2 = getBoundingBox().getIntersection(origin, edge.getTwin().getDirection());
+
+				DCELVertex vertex1 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection1, edge.getTwin());
+				DCELVertex vertex2 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection2, edge);
+				vertices.add(vertex1);
+				vertices.add(vertex2);
+
+				edge.setOrigin(vertex2);
+				edge.getTwin().setOrigin(vertex1);
+
+				DCELEdge outerBoundingEdge1 = getBoundingBox().getIntersectedEdge(intersection1);
+				DCELEdge innerBoundingEdge1 = outerBoundingEdge1.getTwin();
+				DCELEdge newOuterBoundingEdge1 = new DCELEdge(innerBoundingEdge1);
+				DCELEdge newInnerBoundingEdge1 = new DCELEdge(outerBoundingEdge1);
+
+				DCELEdge outerBoundingEdge2 = getBoundingBox().getIntersectedEdge(intersection2);
+				DCELEdge innerBoundingEdge2 = outerBoundingEdge2.getTwin();
+				DCELEdge newOuterBoundingEdge2 = new DCELEdge(innerBoundingEdge2);
+				DCELEdge newInnerBoundingEdge2 = new DCELEdge(outerBoundingEdge2);
+
+				edges.add(newOuterBoundingEdge1);
+				edges.add(newInnerBoundingEdge1);
+				edges.add(newOuterBoundingEdge2);
+				edges.add(newInnerBoundingEdge2);
+
+				newOuterBoundingEdge1.setOrigin(vertex1);
+				newInnerBoundingEdge1.setOrigin(vertex1);
+				newOuterBoundingEdge2.setOrigin(vertex2);
+				newInnerBoundingEdge2.setOrigin(vertex2);
+
+				newOuterBoundingEdge1.setIncidentFace(outerBoundingEdge1.getIncidentFace());
+				newOuterBoundingEdge2.setIncidentFace(outerBoundingEdge2.getIncidentFace());
+
+				newOuterBoundingEdge1.setNext(outerBoundingEdge1.getNext());
+				outerBoundingEdge1.setNext(newOuterBoundingEdge2);
+				newInnerBoundingEdge1.setNext(innerBoundingEdge1.getNext());
+				innerBoundingEdge1.setNext(edge.getTwin());
+				edge.setNext(newInnerBoundingEdge1);
+
+				newOuterBoundingEdge2.setNext(outerBoundingEdge2.getNext());
+				outerBoundingEdge2.setNext(newOuterBoundingEdge2);
+				newInnerBoundingEdge2.setNext(innerBoundingEdge2.getNext());
+				innerBoundingEdge2.setNext(edge);
+				edge.getTwin().setNext(newInnerBoundingEdge2);
+
+				newOuterBoundingEdge1.setPrev(outerBoundingEdge1);
+				newOuterBoundingEdge1.getNext().setPrev(newOuterBoundingEdge1);
+				newInnerBoundingEdge1.setPrev(edge);
+				newInnerBoundingEdge1.getNext().setPrev(newInnerBoundingEdge1);
+				edge.getTwin().setPrev(innerBoundingEdge1);
+
+				newOuterBoundingEdge2.setPrev(outerBoundingEdge2);
+				newOuterBoundingEdge2.getNext().setPrev(newOuterBoundingEdge2);
+				newInnerBoundingEdge2.setPrev(edge.getTwin());
+				newInnerBoundingEdge2.getNext().setPrev(newInnerBoundingEdge2);
+				edge.setPrev(innerBoundingEdge2);
+			}
 			else
 			{
-				// TODO Issue with more than three cocircular points where one pair of edges has no origin points
-				edge = breakpoint.getTracedEdge().getTwin();
-				origin = edge.getOrigin().getCoordinates();
+				if (edge.getOrigin() != null)
+					origin = edge.getOrigin().getCoordinates();
+				else
+				{
+					// TODO Issue with more than three cocircular points where one pair of edges has no origin points
+					edge = breakpoint.getTracedEdge().getTwin();
+					origin = edge.getOrigin().getCoordinates();
+				}
+
+				getBoundingBox().connectEdge(this, origin, edge);
 			}
-
-			Point intersection = getBoundingBox().getIntersection(origin, edge.getDirection());
-
-			DCELVertex vertex = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection, edge.getTwin());
-			vertices.add(vertex);
-
-			DCELEdge outerBoundingEdge = getBoundingBox().getIntersectedEdge(intersection);
-			DCELEdge innerBoundingEdge = outerBoundingEdge.getTwin();
-			DCELEdge newOuterBoundingEdge = new DCELEdge(innerBoundingEdge);
-			DCELEdge newInnerBoundingEdge = new DCELEdge(outerBoundingEdge);
-
-			edges.add(newOuterBoundingEdge);
-			edges.add(newInnerBoundingEdge);
-
-			edge.getTwin().setOrigin(vertex);
-			newOuterBoundingEdge.setOrigin(vertex);
-			newInnerBoundingEdge.setOrigin(vertex);
-
-			newOuterBoundingEdge.setIncidentFace(outerBoundingEdge.getIncidentFace());
-
-			newOuterBoundingEdge.setNext(outerBoundingEdge.getNext());
-			outerBoundingEdge.setNext(newOuterBoundingEdge);
-			newInnerBoundingEdge.setNext(innerBoundingEdge.getNext());
-			innerBoundingEdge.setNext(edge.getTwin());
-			edge.setNext(newInnerBoundingEdge);
-
-			newOuterBoundingEdge.setPrev(outerBoundingEdge);
-			newOuterBoundingEdge.getNext().setPrev(newOuterBoundingEdge);
-			newInnerBoundingEdge.setPrev(edge);
-			newInnerBoundingEdge.getNext().setPrev(newInnerBoundingEdge);
-			edge.getTwin().setPrev(innerBoundingEdge);
 		}
 	}
 

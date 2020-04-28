@@ -75,6 +75,11 @@ public class DCELEdge
 		return origin.isVoronoiVertex() || twin.origin.isVoronoiVertex();
 	}
 
+	public boolean isDelaunayEdge()
+	{
+		return origin.isDelaunayVertex() || twin.origin.isDelaunayVertex();
+	}
+
 	public boolean isDirectedRight()
 	{
 		return direction[0] > 0;
@@ -101,16 +106,20 @@ public class DCELEdge
 			StringBuilder builder = new StringBuilder();
 			//builder.append('e');
 
-			// For testing purposes, differentiate between the edges of the diagram and the edges along the bounding box
-			if (origin != null && twin.origin != null)
+			if (origin != null)
 			{
-				if (isVoronoiEdge())
-					builder.append("ve");
-				else
-					builder.append("be");
+				if (isVoronoiEdge()) builder.append("ve");
+				else if (isDelaunayEdge()) builder.append("de");
+				else builder.append("be");
+				//if (origin.isBoundingVertex()) builder.append('b');
 				builder.append(origin.getIndex());
 			}
-			if (twin != null && twin.origin != null) builder.append(',').append(twin.origin.getIndex());
+			if (twin != null && twin.origin != null)
+			{
+				builder.append(',');
+				//if (twin.origin.isBoundingVertex()) builder.append('b');
+				builder.append(twin.origin.getIndex());
+			}
 
 			return builder.toString();
 		}

@@ -4,6 +4,7 @@ import auxiliary.Point;
 import dcel.DCELEdge;
 import dcel.DCELVertex;
 import dcel.DoublyConnectedEdgeList;
+import delaunay.DelaunayTriangulation;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -46,8 +47,17 @@ public class Visualizer
 
 	public void drawDCEL(DoublyConnectedEdgeList dcel)
 	{
-		graphicsContext.setFill(Color.BLACK);
-		graphicsContext.setStroke(Color.BLACK);
+		if (dcel.getClass() == DelaunayTriangulation.class)
+		{
+			graphicsContext.setFill(Color.RED);
+			graphicsContext.setStroke(Color.RED);
+		}
+		else
+		{
+			graphicsContext.setFill(Color.BLACK);
+			graphicsContext.setStroke(Color.BLACK);
+		}
+
 		graphicsContext.setLineWidth(pointRadius / 3);
 
 		// TODO Prevent each edge from being drawn twice
@@ -55,7 +65,7 @@ public class Visualizer
 		for (DCELEdge edge : dcel.getEdges())
 		{
 			/* Don't display bounding box edges; they aren't visible anyway */
-			if (edge.isVoronoiEdge())
+			if (edge.isVoronoiEdge() || edge.isDelaunayEdge())
 			{
 				Point2D lineStart, lineEnd;
 
@@ -72,7 +82,7 @@ public class Visualizer
 		for (DCELVertex vertex : dcel.getVertices())
 		{
 			/* Don't display bounding box vertices; they aren't visible anyway */
-			if (vertex.isVoronoiVertex())
+			if (vertex.isVoronoiVertex() || vertex.isDelaunayVertex())
 			{
 				Point2D scaledPoint = scalePoint(vertex.getCoordinates());
 				graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);

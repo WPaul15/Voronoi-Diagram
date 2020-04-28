@@ -13,7 +13,7 @@ public class DoublyConnectedEdgeList
 {
 	protected final List<DCELVertex> vertices;
 	protected final List<DCELEdge> edges;
-	protected final List<DCELFace> faces;
+	protected List<DCELFace> faces;
 	private BoundingBox boundingBox;
 
 	public DoublyConnectedEdgeList()
@@ -28,16 +28,26 @@ public class DoublyConnectedEdgeList
 		double minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
 		double minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
-		for (DCELVertex v : vertices)
+		if (!vertices.isEmpty())
 		{
-			double x = v.getCoordinates().getX();
-			double y = v.getCoordinates().getY();
+			for (DCELVertex v : vertices)
+			{
+				double x = v.getCoordinates().getX();
+				double y = v.getCoordinates().getY();
 
-			if (x < minX) minX = x;
-			if (x > maxX) maxX = x;
+				if (x < minX) minX = x;
+				if (x > maxX) maxX = x;
 
-			if (y < minY) minY = y;
-			if (y > maxY) maxY = y;
+				if (y < minY) minY = y;
+				if (y > maxY) maxY = y;
+			}
+		}
+		else
+		{
+			minX = -200;
+			maxX = 200;
+			minY = -200;
+			maxY = 200;
 		}
 
 		int boundingBoxPadding = 20;
@@ -79,8 +89,7 @@ public class DoublyConnectedEdgeList
 		edges.add(leftOuter);
 
 		// TODO Move to face calculation method
-		DCELFace uf = new DCELFace(0, null, bottomInner);
-
+		DCELFace uf = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null, bottomInner);
 		faces.add(uf);
 
 		bottomOuter.setIncidentFace(uf);
@@ -119,7 +128,7 @@ public class DoublyConnectedEdgeList
 		{
 			if (edge.getIncidentFace() == null)
 			{
-				DCELFace face = new DCELFace(++index, edge);
+				DCELFace face = new DCELFace(null, ++index, edge);
 				faces.add(face);
 
 				edge.setIncidentFace(face);
@@ -211,6 +220,40 @@ public class DoublyConnectedEdgeList
 			this.lowerRight = lowerRight;
 			this.upperRight = upperRight;
 			this.upperLeft = upperLeft;
+		}
+
+		public void connectEdge(DoublyConnectedEdgeList dcel, Point origin, DCELEdge edge)
+		{
+			Point intersection = getIntersection(origin, edge.getDirection());
+
+			DCELVertex vertex = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection, edge.getTwin());
+			dcel.vertices.add(vertex);
+
+			DCELEdge outerBoundingEdge = getIntersectedEdge(intersection);
+			DCELEdge innerBoundingEdge = outerBoundingEdge.getTwin();
+			DCELEdge newOuterBoundingEdge = new DCELEdge(innerBoundingEdge);
+			DCELEdge newInnerBoundingEdge = new DCELEdge(outerBoundingEdge);
+
+			dcel.edges.add(newOuterBoundingEdge);
+			dcel.edges.add(newInnerBoundingEdge);
+
+			edge.getTwin().setOrigin(vertex);
+			newOuterBoundingEdge.setOrigin(vertex);
+			newInnerBoundingEdge.setOrigin(vertex);
+
+			newOuterBoundingEdge.setIncidentFace(outerBoundingEdge.getIncidentFace());
+
+			newOuterBoundingEdge.setNext(outerBoundingEdge.getNext());
+			outerBoundingEdge.setNext(newOuterBoundingEdge);
+			newInnerBoundingEdge.setNext(innerBoundingEdge.getNext());
+			innerBoundingEdge.setNext(edge.getTwin());
+			edge.setNext(newInnerBoundingEdge);
+
+			newOuterBoundingEdge.setPrev(outerBoundingEdge);
+			newOuterBoundingEdge.getNext().setPrev(newOuterBoundingEdge);
+			newInnerBoundingEdge.setPrev(edge);
+			newInnerBoundingEdge.getNext().setPrev(newInnerBoundingEdge);
+			edge.getTwin().setPrev(innerBoundingEdge);
 		}
 
 		public Point getIntersection(Point origin, double[] direction)

@@ -1,4 +1,5 @@
 import dcel.DoublyConnectedEdgeList;
+import delaunay.DelaunayTriangulation;
 import display.Visualizer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,10 +40,13 @@ public class Main extends Application
 			throw new Exception("Please specify an input file and whether or not the resulting Voronoi diagram should be displayed");
 
 		Set<SiteEvent> sitePoints = readInputFile(parameters.get(0));
+		if (sitePoints.isEmpty()) Platform.exit();
+
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 
-		DoublyConnectedEdgeList voronoiDiagram = new VoronoiDiagram(sitePoints);
-		writeOutputFile(voronoiDiagram);
+		VoronoiDiagram voronoiDiagram = new VoronoiDiagram(sitePoints);
+		DelaunayTriangulation delaunayTriangulation = new DelaunayTriangulation(voronoiDiagram);
+		writeOutputFile(voronoiDiagram, delaunayTriangulation);
 
 		if (display)
 		{
@@ -55,10 +59,11 @@ public class Main extends Application
 			primaryStage.setScene(new Scene(root));
 
 			Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
-			//visualizer.setScale(minX, maxX, minY, maxY);
-			visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
-			visualizer.plotSiteEvents(sitePoints);
+			visualizer.setScale(minX, maxX, minY, maxY);
+			//visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
+			//visualizer.plotSiteEvents(sitePoints);
 			visualizer.drawDCEL(voronoiDiagram);
+			visualizer.drawDCEL(delaunayTriangulation);
 			primaryStage.show();
 		}
 		else Platform.exit();
@@ -69,8 +74,8 @@ public class Main extends Application
 	 * {@code List} of the points. Also calculates the minimum and maximum x- and y-values of the input set for display
 	 * purposes.
 	 *
-	 * @param filePath The path to the file containing the input points.
-	 * @return A {@code List} of {@code Event}s created from the points contained in the given file.
+	 * @param filePath the path to the file containing the input points.
+	 * @return a {@code List} of {@code Event}s created from the points contained in the given file.
 	 */
 	private Set<SiteEvent> readInputFile(String filePath)
 	{
@@ -117,11 +122,14 @@ public class Main extends Application
 	}
 
 	/**
-	 * Writes the specified Voronoi diagram to the output file.
+	 * Writes the specified Voronoi diagram and Delaunay triangulation to the output file.
 	 *
-	 * @param voronoi The Voronoi diagram to be written, represented as a {@code DoublyConnectedEdgeList}.
+	 * @param voronoiDiagram        the Voronoi diagram to be written to the file, represented as a
+	 *                              {@code DoublyConnectedEdgeList}
+	 * @param delaunayTriangulation the Delaunay triangulation to be written to the file, represented as a
+	 *                              {@code DoublyConnectedEdgeList}
 	 */
-	private void writeOutputFile(DoublyConnectedEdgeList voronoi)
+	private void writeOutputFile(DoublyConnectedEdgeList voronoiDiagram, DoublyConnectedEdgeList delaunayTriangulation)
 	{
 		try
 		{
@@ -130,9 +138,10 @@ public class Main extends Application
 
 			FileWriter writer = new FileWriter(outputFile);
 			writer.write("****** Voronoi Diagram ******\n");
-			writer.write(voronoi.toString());
+			writer.write(voronoiDiagram.toString());
 			writer.write("\n\n");
 			writer.write("****** Delaunay Triangulation ******\n");
+			writer.write(delaunayTriangulation.toString());
 			writer.close();
 		}
 		catch (IOException ex)

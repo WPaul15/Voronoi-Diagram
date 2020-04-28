@@ -7,13 +7,17 @@ import auxiliary.Point;
  */
 public class DCELVertex
 {
-	public enum VertexType
+	private static int voronoiVertexIndex = 0;
+	private static int delaunayVertexIndex = 0;
+
+	public DCELVertex(Point coordinates, DCELEdge incidentEdge)
 	{
-		VORONOI_VERTEX,
-		BOUNDING_VERTEX
+		this.index = ++voronoiVertexIndex;
+		this.type = VertexType.VORONOI_VERTEX;
+		this.coordinates = coordinates;
+		this.incidentEdge = incidentEdge;
 	}
 
-	private static int vertexIndex = 0;
 	private static int boundingVertexIndex = 0;
 
 	private final int index;
@@ -21,17 +25,14 @@ public class DCELVertex
 	private final Point coordinates;
 	private DCELEdge incidentEdge;
 
-	public DCELVertex(Point coordinates, DCELEdge incidentEdge)
-	{
-		this.index = ++vertexIndex;
-		this.type = VertexType.VORONOI_VERTEX;
-		this.coordinates = coordinates;
-		this.incidentEdge = incidentEdge;
-	}
-
 	public DCELVertex(VertexType type, Point coordinates)
 	{
-		this.index = ++boundingVertexIndex;
+		if (type == VertexType.VORONOI_VERTEX)
+			this.index = ++voronoiVertexIndex;
+		else if (type == VertexType.DELAUNAY_VERTEX)
+			this.index = ++delaunayVertexIndex;
+		else
+			this.index = ++boundingVertexIndex;
 		this.type = type;
 		this.coordinates = coordinates;
 		this.incidentEdge = null;
@@ -39,10 +40,20 @@ public class DCELVertex
 
 	public DCELVertex(VertexType type, Point coordinates, DCELEdge incidentEdge)
 	{
-		this.index = ++boundingVertexIndex;
+		if (type == VertexType.VORONOI_VERTEX)
+			this.index = ++voronoiVertexIndex;
+		else if (type == VertexType.DELAUNAY_VERTEX)
+			this.index = ++delaunayVertexIndex;
+		else
+			this.index = ++boundingVertexIndex;
 		this.type = type;
 		this.coordinates = coordinates;
 		this.incidentEdge = incidentEdge;
+	}
+
+	public boolean isDelaunayVertex()
+	{
+		return type == VertexType.DELAUNAY_VERTEX;
 	}
 
 	public boolean isVoronoiVertex()
@@ -50,10 +61,29 @@ public class DCELVertex
 		return type == VertexType.VORONOI_VERTEX;
 	}
 
+	public boolean isBoundingVertex()
+	{
+		return type == VertexType.BOUNDING_VERTEX;
+	}
+
 	public String getName()
 	{
 		if (isVoronoiVertex()) return "v" + index;
+		else if (isDelaunayVertex()) return "p" + index;
 		else return "b" + index;
+	}
+
+	public DCELEdge getLastIncomingEdge()
+	{
+		DCELEdge edge = incidentEdge.getTwin();
+
+		if (edge.getNext() == null) return edge;
+
+		while (edge.getNext() != incidentEdge)
+		{
+			edge = edge.getNext().getTwin();
+		}
+		return edge;
 	}
 
 	public int getIndex()
@@ -81,9 +111,34 @@ public class DCELVertex
 		this.incidentEdge = incidentEdge;
 	}
 
+	public DCELEdge getLastOutgoingEdge()
+	{
+		DCELEdge edge = incidentEdge;
+
+		if (edge.getPrev() == null) return edge;
+
+		while (edge.getPrev() != incidentEdge.getTwin())
+		{
+			edge = edge.getPrev().getTwin();
+		}
+		return edge;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getName() + "  " + coordinates.toString() + "  " + incidentEdge.getName();
+		StringBuilder builder = new StringBuilder();
+
+		builder.append(getName()).append("  ").append(coordinates.toString());
+		if (incidentEdge != null) builder.append("  ").append(incidentEdge.getName());
+
+		return builder.toString();
+	}
+
+	public enum VertexType
+	{
+		VORONOI_VERTEX,
+		DELAUNAY_VERTEX,
+		BOUNDING_VERTEX
 	}
 }
