@@ -60,23 +60,31 @@ public class Visualizer
 
 		graphicsContext.setLineWidth(pointRadius / 3);
 
-		// TODO Prevent each edge from being drawn twice
+		DCELEdge prevEdge = null;
+
 		// TODO Extend unbounded edges to edge of window regardless of bounding box size
 		for (DCELEdge edge : dcel.getEdges())
 		{
-			/* Don't display bounding box edges; they aren't visible anyway */
-			if (edge.isVoronoiEdge() || edge.isDelaunayEdge())
+			if (prevEdge == null) prevEdge = edge;
+
+			if (!prevEdge.equals(edge.getTwin()))
 			{
-				Point2D lineStart, lineEnd;
+				/* Don't display bounding box edges; they aren't visible anyway */
+				if (edge.isVoronoiEdge() || edge.isDelaunayEdge())
+				{
+					Point2D lineStart, lineEnd;
 
-				lineStart = scalePoint(edge.getOrigin().getCoordinates());
-				lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
+					lineStart = scalePoint(edge.getOrigin().getCoordinates());
+					lineEnd = scalePoint(edge.getTwin().getOrigin().getCoordinates());
 
-				graphicsContext.strokeLine(lineStart.getX() + (pointRadius / 2),
-				                           lineStart.getY() + (pointRadius / 2),
-				                           lineEnd.getX() + (pointRadius / 2),
-				                           lineEnd.getY() + (pointRadius / 2));
+					graphicsContext.strokeLine(lineStart.getX() + (pointRadius / 2),
+					                           lineStart.getY() + (pointRadius / 2),
+					                           lineEnd.getX() + (pointRadius / 2),
+					                           lineEnd.getY() + (pointRadius / 2));
+				}
 			}
+
+			prevEdge = edge;
 		}
 
 		for (DCELVertex vertex : dcel.getVertices())
