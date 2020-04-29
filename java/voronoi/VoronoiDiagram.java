@@ -110,9 +110,25 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				breakpoint = new Breakpoint(alpha.getSite(), event, null);
 
 				if (!edge1.isDirectedUp())
+				{
 					breakpoint.setTracedEdge(edge1);
+
+					edge1.setIncidentFace(event.getCell());
+					edge2.setIncidentFace(alpha.getSite().getCell());
+
+					event.getCell().setOuterComponent(edge1);
+					alpha.getSite().getCell().setOuterComponent(edge2);
+				}
 				else
+				{
 					breakpoint.setTracedEdge(edge2);
+
+					edge1.setIncidentFace(alpha.getSite().getCell());
+					edge2.setIncidentFace(event.getCell());
+
+					alpha.getSite().getCell().setOuterComponent(edge1);
+					event.getCell().setOuterComponent(edge2);
+				}
 
 				leftArcSegment = new ArcSegment(alpha.getSite(), alpha.getLeftBreakpoint(), breakpoint);
 				rightArcSegment = new ArcSegment(event, breakpoint, alpha.getRightBreakpoint());
@@ -122,9 +138,25 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				breakpoint = new Breakpoint(event, alpha.getSite(), null);
 
 				if (!edge1.isDirectedUp())
+				{
 					breakpoint.setTracedEdge(edge1);
+
+					edge1.setIncidentFace(alpha.getSite().getCell());
+					edge2.setIncidentFace(event.getCell());
+
+					alpha.getSite().getCell().setOuterComponent(edge1);
+					event.getCell().setOuterComponent(edge2);
+				}
 				else
+				{
 					breakpoint.setTracedEdge(edge2);
+
+					edge1.setIncidentFace(event.getCell());
+					edge2.setIncidentFace(alpha.getSite().getCell());
+
+					event.getCell().setOuterComponent(edge1);
+					alpha.getSite().getCell().setOuterComponent(edge2);
+				}
 
 				leftArcSegment = new ArcSegment(event, alpha.getLeftBreakpoint(), breakpoint);
 				rightArcSegment = new ArcSegment(alpha.getSite(), breakpoint, alpha.getRightBreakpoint());

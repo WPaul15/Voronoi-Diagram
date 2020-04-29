@@ -8,6 +8,11 @@ import voronoi.VoronoiDiagram;
 
 public class DelaunayTriangulation extends DoublyConnectedEdgeList
 {
+	public DelaunayTriangulation()
+	{
+		super();
+	}
+
 	public DelaunayTriangulation(VoronoiDiagram voronoiDiagram)
 	{
 		super();

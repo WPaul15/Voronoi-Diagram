@@ -61,7 +61,7 @@ public class Main extends Application
 			Visualizer visualizer = new Visualizer(canvas.getWidth(), canvas.getHeight(), canvas.getGraphicsContext2D());
 			visualizer.setScale(minX, maxX, minY, maxY);
 			//visualizer.setScale(sitePoints, voronoiDiagram.getVerticesForDisplay());
-			//visualizer.plotSiteEvents(sitePoints);
+			visualizer.plotSiteEvents(sitePoints);
 			visualizer.drawDCEL(voronoiDiagram);
 			visualizer.drawDCEL(delaunayTriangulation);
 			primaryStage.show();
