@@ -5,7 +5,15 @@ package dcel;
  */
 public class DCELEdge
 {
+	public enum EdgeType
+	{
+		VORONOI_EDGE,
+		DELAUNAY_EDGE,
+		BOUNDING_EDGE
+	}
+
 	private final String name;
+	private final EdgeType type;
 	private DCELVertex origin;
 	private DCELFace incidentFace;
 	private DCELEdge twin, next, prev;
@@ -16,9 +24,10 @@ public class DCELEdge
 	/**
 	 * Constructs a new DCEL edge.
 	 */
-	public DCELEdge()
+	public DCELEdge(EdgeType type)
 	{
 		this.name = "";
+		this.type = type;
 		this.origin = null;
 		this.twin = null;
 		this.incidentFace = null;
@@ -27,9 +36,10 @@ public class DCELEdge
 		this.direction = new double[2];
 	}
 
-	public DCELEdge(DCELVertex origin)
+	public DCELEdge(EdgeType type, DCELVertex origin)
 	{
 		this.name = "";
+		this.type = type;
 		this.origin = origin;
 		this.twin = null;
 		this.incidentFace = null;
@@ -44,9 +54,10 @@ public class DCELEdge
 	 *
 	 * @param twin The twin edge of this edge
 	 */
-	public DCELEdge(DCELEdge twin)
+	public DCELEdge(EdgeType type, DCELEdge twin)
 	{
 		this.name = "";
+		this.type = type;
 		this.origin = null;
 		this.twin = twin;
 		this.incidentFace = null;
@@ -57,9 +68,10 @@ public class DCELEdge
 		twin.twin = this;
 	}
 
-	public DCELEdge(DCELVertex origin, DCELEdge twin)
+	public DCELEdge(EdgeType type, DCELVertex origin, DCELEdge twin)
 	{
 		this.name = "";
+		this.type = type;
 		this.origin = origin;
 		this.twin = twin;
 		this.incidentFace = null;
@@ -72,12 +84,17 @@ public class DCELEdge
 
 	public boolean isVoronoiEdge()
 	{
-		return origin.isVoronoiVertex() || twin.origin.isVoronoiVertex();
+		return type == EdgeType.VORONOI_EDGE;
 	}
 
 	public boolean isDelaunayEdge()
 	{
-		return origin.isDelaunayVertex() || twin.origin.isDelaunayVertex();
+		return type == EdgeType.DELAUNAY_EDGE;
+	}
+
+	public boolean isBoundingEdge()
+	{
+		return type == EdgeType.BOUNDING_EDGE;
 	}
 
 	public boolean isDirectedRight()

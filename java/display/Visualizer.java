@@ -70,7 +70,7 @@ public class Visualizer
 			if (!prevEdge.equals(edge.getTwin()))
 			{
 				/* Don't display bounding box edges; they aren't visible anyway */
-				if (edge.isVoronoiEdge() || edge.isDelaunayEdge())
+				if (!edge.isBoundingEdge())
 				{
 					Point2D lineStart, lineEnd;
 
@@ -90,7 +90,7 @@ public class Visualizer
 		for (DCELVertex vertex : dcel.getVertices())
 		{
 			/* Don't display bounding box vertices; they aren't visible anyway */
-			if (vertex.isVoronoiVertex() || vertex.isDelaunayVertex())
+			if (!vertex.isBoundingVertex())
 			{
 				Point2D scaledPoint = scalePoint(vertex.getCoordinates());
 				graphicsContext.fillOval(scaledPoint.getX(), scaledPoint.getY(), pointRadius, pointRadius);

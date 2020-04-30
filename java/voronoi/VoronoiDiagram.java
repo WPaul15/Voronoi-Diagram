@@ -91,12 +91,12 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 		status.remove(alpha);
 
-		DCELEdge edge1 = new DCELEdge();
-		DCELEdge edge2 = new DCELEdge();
+		DCELEdge edge1 = new DCELEdge(DCELEdge.EdgeType.VORONOI_EDGE);
+		DCELEdge edge2 = new DCELEdge(DCELEdge.EdgeType.VORONOI_EDGE, edge1);
 		edges.add(edge1);
 		edges.add(edge2);
 
-		DCELEdge.setTwinPair(edge1, edge2);
+		//DCELEdge.setTwinPair(edge1, edge2);
 		calculateDirections(edge1, edge2, alpha.getSite(), event);
 
 		/* Handle case in which multiple points have the same y-coordinate as the first */
@@ -261,12 +261,12 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				oldRightBreakpoint.getTracedEdge().getOrigin() == null))
 			breakpoints.remove(oldRightBreakpoint);
 
-		DCELEdge edge1 = new DCELEdge();
-		DCELEdge edge2 = new DCELEdge();
+		DCELEdge edge1 = new DCELEdge(DCELEdge.EdgeType.VORONOI_EDGE);
+		DCELEdge edge2 = new DCELEdge(DCELEdge.EdgeType.VORONOI_EDGE, edge1);
 		edges.add(edge1);
 		edges.add(edge2);
 
-		DCELEdge.setTwinPair(edge1, edge2);
+		//DCELEdge.setTwinPair(edge1, edge2);
 		calculateDirections(edge1, edge2, leftNeighbor.getSite(), rightNeighbor.getSite());
 
 		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), null);
@@ -351,7 +351,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			DCELEdge edge = breakpoint.getTracedEdge();
 			Point origin;
 
-			// TODO Handle collinear site points case
 			if (noVertices)
 			{
 				if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null) continue;
@@ -371,13 +370,13 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 				DCELEdge outerBoundingEdge1 = getBoundingBox().getIntersectedEdge(intersection1);
 				DCELEdge innerBoundingEdge1 = outerBoundingEdge1.getTwin();
-				DCELEdge newOuterBoundingEdge1 = new DCELEdge(innerBoundingEdge1);
-				DCELEdge newInnerBoundingEdge1 = new DCELEdge(outerBoundingEdge1);
+				DCELEdge newOuterBoundingEdge1 = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, innerBoundingEdge1);
+				DCELEdge newInnerBoundingEdge1 = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, outerBoundingEdge1);
 
 				DCELEdge outerBoundingEdge2 = getBoundingBox().getIntersectedEdge(intersection2);
 				DCELEdge innerBoundingEdge2 = outerBoundingEdge2.getTwin();
-				DCELEdge newOuterBoundingEdge2 = new DCELEdge(innerBoundingEdge2);
-				DCELEdge newInnerBoundingEdge2 = new DCELEdge(outerBoundingEdge2);
+				DCELEdge newOuterBoundingEdge2 = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, innerBoundingEdge2);
+				DCELEdge newInnerBoundingEdge2 = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, outerBoundingEdge2);
 
 				edges.add(newOuterBoundingEdge1);
 				edges.add(newInnerBoundingEdge1);
@@ -393,7 +392,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 				newOuterBoundingEdge2.setIncidentFace(outerBoundingEdge2.getIncidentFace());
 
 				newOuterBoundingEdge1.setNext(outerBoundingEdge1.getNext());
-				outerBoundingEdge1.setNext(newOuterBoundingEdge2);
+				outerBoundingEdge1.setNext(newOuterBoundingEdge1);
 				newInnerBoundingEdge1.setNext(innerBoundingEdge1.getNext());
 				innerBoundingEdge1.setNext(edge.getTwin());
 				edge.setNext(newInnerBoundingEdge1);

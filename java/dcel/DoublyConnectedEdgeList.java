@@ -68,14 +68,14 @@ public class DoublyConnectedEdgeList
 		vertices.add(upperRight);
 		vertices.add(upperrLeft);
 
-		DCELEdge bottomInner = new DCELEdge(lowerLeft);
-		DCELEdge bottomOuter = new DCELEdge(lowerRight, bottomInner);
-		DCELEdge rightInner = new DCELEdge(lowerRight);
-		DCELEdge rightOuter = new DCELEdge(upperRight, rightInner);
-		DCELEdge topInner = new DCELEdge(upperRight);
-		DCELEdge topOuter = new DCELEdge(upperrLeft, topInner);
-		DCELEdge leftInner = new DCELEdge(upperrLeft);
-		DCELEdge leftOuter = new DCELEdge(lowerLeft, leftInner);
+		DCELEdge bottomInner = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, lowerLeft);
+		DCELEdge bottomOuter = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, lowerRight, bottomInner);
+		DCELEdge rightInner = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, lowerRight);
+		DCELEdge rightOuter = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, upperRight, rightInner);
+		DCELEdge topInner = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, upperRight);
+		DCELEdge topOuter = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, upperrLeft, topInner);
+		DCELEdge leftInner = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, upperrLeft);
+		DCELEdge leftOuter = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, lowerLeft, leftInner);
 
 		edges.add(bottomInner);
 		edges.add(bottomOuter);
@@ -221,8 +221,8 @@ public class DoublyConnectedEdgeList
 
 			DCELEdge outerBoundingEdge = getIntersectedEdge(intersection);
 			DCELEdge innerBoundingEdge = outerBoundingEdge.getTwin();
-			DCELEdge newOuterBoundingEdge = new DCELEdge(innerBoundingEdge);
-			DCELEdge newInnerBoundingEdge = new DCELEdge(outerBoundingEdge);
+			DCELEdge newOuterBoundingEdge = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, innerBoundingEdge);
+			DCELEdge newInnerBoundingEdge = new DCELEdge(DCELEdge.EdgeType.BOUNDING_EDGE, outerBoundingEdge);
 
 			dcel.edges.add(newOuterBoundingEdge);
 			dcel.edges.add(newInnerBoundingEdge);

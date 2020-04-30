@@ -46,8 +46,8 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 							(currentVertex.getIncidentEdge().equals(counterclockwiseNeighbor.getIncidentEdge().getTwin())))
 						continue;
 
-					DCELEdge e1 = new DCELEdge();
-					DCELEdge e2 = new DCELEdge(e1);
+					DCELEdge e1 = new DCELEdge(DCELEdge.EdgeType.DELAUNAY_EDGE);
+					DCELEdge e2 = new DCELEdge(DCELEdge.EdgeType.DELAUNAY_EDGE, e1);
 					edges.add(e1);
 					edges.add(e2);
 
