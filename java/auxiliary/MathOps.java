@@ -21,22 +21,9 @@ public class MathOps
 		return new Point(x, y);
 	}
 
-	/**
-	 * Calculates the cross product of the vectors defined by the three points to determine whether the points make a
-	 * clockwise turn, a counterclockwise turn, or are collinear.
-	 *
-	 * @param p1 The origin point of the two vectors.
-	 * @param p2 The endpoint of the first vector.
-	 * @param p3 The endpoint of the second vector.
-	 * @return -1 if the points make a clockwise turn, 0 if they are collinear, or 1 if they make a counterclockwise
-	 * turn.
-	 */
-	public static int crossProduct(Point p1, Point p2, Point p3)
+	public static boolean counterclockwise(Point p1, Point p2, Point p3)
 	{
-		double v = (p2.getX() - p1.getX()) * (p3.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (p3.getX() - p1.getX());
-		if (v > 0) return 1;
-		else if (v < 0) return -1;
-		else return 0;
+		return crossProduct(p1, p2, p3) < 0;
 	}
 
 	/**
@@ -91,5 +78,13 @@ public class MathOps
 	public static boolean thresholdEquals(double a, double b)
 	{
 		return Math.abs(a - b) < EPSILON;
+	}
+
+	private static int crossProduct(Point p1, Point p2, Point p3)
+	{
+		double v = (p2.getX() - p1.getX()) * (p3.getY() - p1.getY()) - (p2.getY() - p1.getY()) * (p3.getX() - p1.getX());
+		if (v > 0) return 1;
+		else if (v < 0) return -1;
+		else return 0;
 	}
 }

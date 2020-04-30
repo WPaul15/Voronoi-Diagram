@@ -20,7 +20,7 @@ public class DCELFace
 	private final FaceType type;
 	private final int index;
 	private DCELEdge outerComponent;
-	private List<DCELEdge> innerComponents;
+	private final List<DCELEdge> innerComponents;
 
 	public DCELFace(FaceType type, int index, DCELEdge outerComponent, DCELEdge... innerComponents)
 	{

@@ -266,7 +266,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		edges.add(edge1);
 		edges.add(edge2);
 
-		//DCELEdge.setTwinPair(edge1, edge2);
 		calculateDirections(edge1, edge2, leftNeighbor.getSite(), rightNeighbor.getSite());
 
 		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), null);
@@ -312,29 +311,29 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	private void checkForCircleEvent(ArcSegment arcSegment)
 	{
 		/* If the arc has no left or right neighbors (i.e. if it is on the end of the beach line), there can be no
-		circle event */
+		circle event. */
 		if (arcSegment.getLeftBreakpoint() == null || arcSegment.getRightBreakpoint() == null) return;
 
 		Point p1 = arcSegment.getLeftBreakpoint().getLeftArcSegment();
 		Point p2 = arcSegment.getSite();
 		Point p3 = arcSegment.getRightBreakpoint().getRightArcSegment();
 
-		/* If the points make a clockwise turn, we have a circle */
-		if (MathOps.crossProduct(p1, p2, p3) < 0)
+		/* If the points make a clockwise turn, we have a circle. */
+		if (MathOps.counterclockwise(p1, p2, p3))
 		{
 			Circle circle = MathOps.circle(p1, p2, p3);
 			CircleEvent circleEvent = new CircleEvent(circle, arcSegment);
 
-			/* Add the circle event to the queue and update the pointer in the status tree */
+			/* Add the circle event to the queue and update the pointer in the status tree. */
 			queue.add(circleEvent);
 			status.put(arcSegment, circleEvent);
 		}
 	}
 
-	// TODO Handle case where edge intersects a corner of the bounding box
 	private void connectInfiniteEdges()
 	{
-		/* If there are exactly four vertices, they are the corners of the bounding box and there are no Voronoi vertices. */
+		/* If there are exactly four vertices, they are the corners of the bounding box and there are no Voronoi
+		vertices. */
 		boolean noVertices = vertices.size() == 4;
 
 		/* If this is true, then there is only one face and thus, only one site point. */
@@ -353,7 +352,8 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 			if (noVertices)
 			{
-				/* Once we've encountered one unbounded half-edge, we update both that edge and the twin simultaneously. */
+				/* Once we've encountered one unbounded half-edge, we update both that edge and the twin
+				simultaneously. */
 				if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null) continue;
 
 				/* We use this "origin" to calculate the bounding box intersection points. */

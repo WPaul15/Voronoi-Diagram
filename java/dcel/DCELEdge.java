@@ -102,12 +102,6 @@ public class DCELEdge
 		return direction[0] > 0;
 	}
 
-	public static void setTwinPair(DCELEdge edge1, DCELEdge edge2)
-	{
-		edge1.twin = edge2;
-		edge2.twin = edge1;
-	}
-
 	public boolean isDirectedUp()
 	{
 		if (direction[0] == 0)
