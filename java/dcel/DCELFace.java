@@ -9,8 +9,18 @@ import java.util.List;
  */
 public class DCELFace
 {
+	public enum FaceType
+	{
+		VORONOI_CELL,
+		DELAUNAY_TRIANGLE,
+		UNBOUNDED
+	}
+
 	private final DCELVertex site;
 	private final FaceType type;
+	private final int index;
+	private DCELEdge outerComponent;
+	private List<DCELEdge> innerComponents;
 
 	public DCELFace(FaceType type, int index, DCELEdge outerComponent, DCELEdge... innerComponents)
 	{
@@ -21,10 +31,6 @@ public class DCELFace
 		this.innerComponents = new ArrayList<>();
 		Collections.addAll(this.innerComponents, innerComponents);
 	}
-
-	private final int index;
-	private DCELEdge outerComponent;
-	private List<DCELEdge> innerComponents;
 
 	public DCELFace(DCELVertex site, FaceType type, int index, DCELEdge outerComponent, DCELEdge... innerComponents)
 	{
@@ -56,18 +62,6 @@ public class DCELFace
 		}
 	}
 
-	public int getIndex()
-	{
-		return index;
-	}
-
-	public enum FaceType
-	{
-		VORONOI_CELL,
-		DELAUNAY_TRIANGLE,
-		UNBOUNDED
-	}
-
 	public DCELEdge getOuterComponent()
 	{
 		return outerComponent;
@@ -78,14 +72,10 @@ public class DCELFace
 		this.outerComponent = outerComponent;
 	}
 
-	public List<DCELEdge> getInnerComponents()
+	public void setInnerComponents(DCELEdge... innerComponents)
 	{
-		return innerComponents;
-	}
-
-	public void setInnerComponents(List<DCELEdge> innerComponents)
-	{
-		this.innerComponents = innerComponents;
+		this.innerComponents.clear();
+		Collections.addAll(this.innerComponents, innerComponents);
 	}
 
 	@Override

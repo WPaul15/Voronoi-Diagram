@@ -6,6 +6,8 @@ import dcel.DCELVertex;
 import dcel.DoublyConnectedEdgeList;
 import voronoi.VoronoiDiagram;
 
+import java.util.List;
+
 public class DelaunayTriangulation extends DoublyConnectedEdgeList
 {
 	public DelaunayTriangulation()
@@ -19,150 +21,106 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 		createFromVoronoiDiagram(voronoiDiagram);
 	}
 
+	/* Try vertex method. Get list of faces around a vertex in ccw order. For each pair, if the incident edges of the
+	 * site points are not twins of each other, the site points aren't connected. If only one site point has an incident
+	 * edge, connect them. The faces correspond to the vertices and the incident face of the edge v1 -> v2 (current
+	 * vertex -> ccw neighbor) is the face for that vertex. The other is the unbounded face.
+	 * This is different if the incident edges are twins of each other; in this case, we only need to set the face of the
+	 * incident edge to the current vertex's face.*/
+
 	private void createFromVoronoiDiagram(VoronoiDiagram voronoiDiagram)
 	{
-		DCELFace uf = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null);
-		faces.add(uf);
+		DCELFace unboundedFace = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null);
+		faces.add(unboundedFace);
 
 		for (DCELFace f : voronoiDiagram.getFaces())
 		{
 			if (f.getOuterComponent() != null) vertices.add(f.getSite());
 		}
 
-		DCELEdge prevEdge = null;
-
-		for (DCELEdge e : voronoiDiagram.getEdges())
+		for (DCELVertex v : voronoiDiagram.getVertices())
 		{
-			if (e.isVoronoiEdge())
+			if (v.isVoronoiVertex())
 			{
-				if (prevEdge == null) prevEdge = e;
+				DCELFace delaunayFace = new DCELFace(DCELFace.FaceType.DELAUNAY_TRIANGLE, v.getIndex(), null);
+				faces.add(delaunayFace);
+				List<DCELFace> incidentFaces = v.getIncidentFaces();
 
-				/* Hack to avoid computing duplicates; Each pair of twin half-edges in the Voronoi diagram is listed together */
-				if (!prevEdge.equals(e.getTwin()))
+				for (int i = 0; i < incidentFaces.size(); i++)
 				{
-					// TODO Mostly Vertical Lines Test causes NullPointerException becuase an edge doesn't have an incident face
-					DCELVertex v1 = e.getIncidentFace().getSite();
-					DCELVertex v2 = e.getTwin().getIncidentFace().getSite();
+					DCELVertex currentVertex = incidentFaces.get(i).getSite();
+					DCELVertex counterclockwiseNeighbor = incidentFaces.get((i + 1) % incidentFaces.size()).getSite();
+
+					/* The vertices are already connected, so we don't need to do anything. */
+					if ((currentVertex.getIncidentEdge() != null && counterclockwiseNeighbor.getIncidentEdge() != null) &&
+							(currentVertex.getIncidentEdge().equals(counterclockwiseNeighbor.getIncidentEdge().getTwin())))
+						continue;
 
 					DCELEdge e1 = new DCELEdge();
 					DCELEdge e2 = new DCELEdge(e1);
 					edges.add(e1);
 					edges.add(e2);
 
-					e1.setOrigin(v1);
-					e2.setOrigin(v2);
+					e1.setOrigin(currentVertex);
+					e2.setOrigin(counterclockwiseNeighbor);
 
-					if (v1.getIncidentEdge() != null && v2.getIncidentEdge() == null)
+					e1.setIncidentFace(delaunayFace);
+					e2.setIncidentFace(unboundedFace);
+
+					if (currentVertex.getIncidentEdge() == null)
 					{
-						DCELEdge lastOutgoingEdge = v1.getIncidentEdge();
-						DCELEdge lastIncomingEdge = v1.getLastIncomingEdge();
+						if (counterclockwiseNeighbor.getIncidentEdge() != null)
+						{
+							DCELEdge prevIncomingEdge = counterclockwiseNeighbor.getPreviousIncomingEdge();
 
-						e2.setNext(lastOutgoingEdge);
-						lastOutgoingEdge.setPrev(e2);
-						e1.setPrev(lastIncomingEdge);
-						lastIncomingEdge.setNext(e1);
+							counterclockwiseNeighbor.getIncidentEdge().setIncidentFace(delaunayFace);
+
+							e1.setNext(counterclockwiseNeighbor.getIncidentEdge());
+							counterclockwiseNeighbor.getIncidentEdge().setPrev(e1);
+							e2.setPrev(prevIncomingEdge);
+							prevIncomingEdge.setNext(e2);
+						}
+						else counterclockwiseNeighbor.setIncidentEdge(e2);
+
+						currentVertex.setIncidentEdge(e1);
 					}
-					else if (v1.getIncidentEdge() != null && v2.getIncidentEdge() != null)
+					else
 					{
-						DCELEdge lastOutgoingEdge = v1.getLastOutgoingEdge();
+						delaunayFace.setOuterComponent(e1);
+						unboundedFace.setInnerComponents(e2);
 
-						e1.setPrev(v1.getIncidentEdge().getTwin());
-						v1.getIncidentEdge().getTwin().setNext(e1);
+						if (counterclockwiseNeighbor.getIncidentEdge() == null)
+						{
+							DCELEdge prevIncomingEdge = currentVertex.getPreviousIncomingEdge();
 
-						e2.setNext(lastOutgoingEdge);
-						lastOutgoingEdge.setPrev(e2);
+							e2.setNext(currentVertex.getIncidentEdge());
+							currentVertex.getIncidentEdge().setPrev(e2);
+							e1.setPrev(prevIncomingEdge);
+							prevIncomingEdge.setNext(e1);
+						}
+						else
+						{
+							DCELEdge nextOutgoingEdge = currentVertex.getNextOutgoingEdge();
+
+							e1.setPrev(currentVertex.getIncidentEdge().getTwin());
+							currentVertex.getIncidentEdge().getTwin().setNext(e1);
+							e2.setNext(nextOutgoingEdge);
+							nextOutgoingEdge.setPrev(e2);
+
+							/* Close the triangle. */
+							e1.setNext(counterclockwiseNeighbor.getIncidentEdge());
+							counterclockwiseNeighbor.getIncidentEdge().setPrev(e1);
+							e2.setPrev(counterclockwiseNeighbor.getIncidentEdge().getTwin());
+							counterclockwiseNeighbor.getIncidentEdge().getTwin().setNext(e2);
+						}
+
+						currentVertex.setIncidentEdge(e1);
+						counterclockwiseNeighbor.setIncidentEdge(e2);
 					}
-
-					if (v2.getIncidentEdge() != null)
-					{
-						e1.setNext(v2.getIncidentEdge());
-						v2.getIncidentEdge().setPrev(e1);
-
-						e2.setPrev(v2.getIncidentEdge().getTwin());
-						v2.getIncidentEdge().getTwin().setNext(e2);
-					}
-
-					v1.setIncidentEdge(e1);
-					v2.setIncidentEdge(e2);
 				}
-
-				prevEdge = e;
 			}
+			/* Since the Voronoi vertices are listed first, we can skip the rest once we hit a bounding vertex. */
+			else if (v.isBoundingVertex()) break;
 		}
-
-
-//		for (DCELVertex v : voronoiDiagram.getVertices())
-//		{
-//			if (v.isVoronoiVertex())
-//			{
-//				List<DCELFace> incidentFaces = v.getIncidentFaces();
-//
-//				/* If there are three incident faces, we are dealing with the general case. Otherwise, we need to add
-//				   extra edges. */
-//				if (faces.size() == 1 && incidentFaces.size() == 3)
-//				{
-//					DCELFace triangle = new DCELFace(DCELFace.FaceType.DELAUNAY_TRIANGLE, v.getIndex(), null);
-//					faces.add(triangle);
-//
-//					List<DCELVertex> delaunayVertices = new ArrayList<>();
-//
-//					for (DCELFace f : incidentFaces)
-//					{
-//						delaunayVertices.add(f.getSite());
-//					}
-
-//					DCELVertex v1 = delaunayVertices.get(0);
-//					DCELVertex v2 = delaunayVertices.get(1);
-//					DCELVertex v3 = delaunayVertices.get(2);
-//
-//					DCELEdge e12 = new DCELEdge();
-//					DCELEdge e21 = new DCELEdge(e12);
-//
-//					DCELEdge e23 = new DCELEdge();
-//					DCELEdge e32 = new DCELEdge(e23);
-//
-//					DCELEdge e31 = new DCELEdge();
-//					DCELEdge e13 = new DCELEdge(e31);
-//
-//					edges.add(e12);
-//					edges.add(e21);
-//					edges.add(e23);
-//					edges.add(e32);
-//					edges.add(e31);
-//					edges.add(e13);
-//
-//					e12.setOrigin(v1);
-//					e21.setOrigin(v2);
-//					e23.setOrigin(v2);
-//					e32.setOrigin(v3);
-//					e31.setOrigin(v3);
-//					e13.setOrigin(v1);
-//
-//					v1.setIncidentEdge(e12);
-//					v2.setIncidentEdge(e23);
-//					v3.setIncidentEdge(e31);
-//
-//					triangle.setOuterComponent(e21);
-//
-//					e12.setIncidentFace(uf);
-//					e21.setIncidentFace(triangle);
-//					e23.setIncidentFace(uf);
-//					e32.setIncidentFace(triangle);
-//					e31.setIncidentFace(uf);
-//					e13.setIncidentFace(triangle);
-//
-//					e12.setNext(e23);
-//					e21.setNext(e13);
-//					e23.setNext(e31);
-//					e32.setNext(e21);
-//					e31.setNext(e12);
-//					e13.setNext(e32);
-//
-//					e12.setPrev(e31);
-//					e21.setPrev(e32);
-//					e23.setPrev(e12);
-//					e32.setPrev(e13);
-//					e31.setPrev(e23);
-//					e13.setPrev(e21);
 	}
 }

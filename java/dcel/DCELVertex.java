@@ -2,13 +2,29 @@ package dcel;
 
 import auxiliary.Point;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Willem Paul
  */
 public class DCELVertex
 {
+	public enum VertexType
+	{
+		VORONOI_VERTEX,
+		DELAUNAY_VERTEX,
+		BOUNDING_VERTEX
+	}
+
 	private static int voronoiVertexIndex = 0;
 	private static int delaunayVertexIndex = 0;
+	private static int boundingVertexIndex = 0;
+
+	private final int index;
+	private final VertexType type;
+	private final Point coordinates;
+	private DCELEdge incidentEdge;
 
 	public DCELVertex(Point coordinates, DCELEdge incidentEdge)
 	{
@@ -17,13 +33,6 @@ public class DCELVertex
 		this.coordinates = coordinates;
 		this.incidentEdge = incidentEdge;
 	}
-
-	private static int boundingVertexIndex = 0;
-
-	private final int index;
-	private final VertexType type;
-	private final Point coordinates;
-	private DCELEdge incidentEdge;
 
 	public DCELVertex(VertexType type, Point coordinates)
 	{
@@ -51,14 +60,14 @@ public class DCELVertex
 		this.incidentEdge = incidentEdge;
 	}
 
-	public boolean isDelaunayVertex()
-	{
-		return type == VertexType.DELAUNAY_VERTEX;
-	}
-
 	public boolean isVoronoiVertex()
 	{
 		return type == VertexType.VORONOI_VERTEX;
+	}
+
+	public boolean isDelaunayVertex()
+	{
+		return type == VertexType.DELAUNAY_VERTEX;
 	}
 
 	public boolean isBoundingVertex()
@@ -66,14 +75,22 @@ public class DCELVertex
 		return type == VertexType.BOUNDING_VERTEX;
 	}
 
-	public String getName()
+	public List<DCELFace> getIncidentFaces()
 	{
-		if (isVoronoiVertex()) return "v" + index;
-		else if (isDelaunayVertex()) return "p" + index;
-		else return "b" + index;
+		ArrayList<DCELFace> incidentFaces = new ArrayList<>();
+		DCELEdge edge = incidentEdge;
+
+		do
+		{
+			incidentFaces.add(edge.getIncidentFace());
+			edge = edge.getPrev().getTwin();
+		}
+		while (edge != incidentEdge);
+
+		return incidentFaces;
 	}
 
-	public DCELEdge getLastIncomingEdge()
+	public DCELEdge getPreviousIncomingEdge()
 	{
 		DCELEdge edge = incidentEdge.getTwin();
 
@@ -86,14 +103,29 @@ public class DCELVertex
 		return edge;
 	}
 
+	public DCELEdge getNextOutgoingEdge()
+	{
+		DCELEdge edge = incidentEdge;
+
+		if (edge.getPrev() == null) return edge;
+
+		while (edge.getPrev() != incidentEdge.getTwin())
+		{
+			edge = edge.getPrev().getTwin();
+		}
+		return edge;
+	}
+
+	public String getName()
+	{
+		if (isVoronoiVertex()) return "v" + index;
+		else if (isDelaunayVertex()) return "p" + index;
+		else return "b" + index;
+	}
+
 	public int getIndex()
 	{
 		return index;
-	}
-
-	public VertexType getType()
-	{
-		return type;
 	}
 
 	public Point getCoordinates()
@@ -111,19 +143,6 @@ public class DCELVertex
 		this.incidentEdge = incidentEdge;
 	}
 
-	public DCELEdge getLastOutgoingEdge()
-	{
-		DCELEdge edge = incidentEdge;
-
-		if (edge.getPrev() == null) return edge;
-
-		while (edge.getPrev() != incidentEdge.getTwin())
-		{
-			edge = edge.getPrev().getTwin();
-		}
-		return edge;
-	}
-
 	@Override
 	public String toString()
 	{
@@ -133,12 +152,5 @@ public class DCELVertex
 		if (incidentEdge != null) builder.append("  ").append(incidentEdge.getName());
 
 		return builder.toString();
-	}
-
-	public enum VertexType
-	{
-		VORONOI_VERTEX,
-		DELAUNAY_VERTEX,
-		BOUNDING_VERTEX
 	}
 }
