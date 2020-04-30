@@ -164,6 +164,17 @@ public class DoublyConnectedEdgeList
 		return boundingBox;
 	}
 
+	public List<Point> getVerticesForDisplay()
+	{
+		List<Point> points = new ArrayList<>();
+		for (DCELVertex vertex : vertices)
+		{
+			if (vertex.isVoronoiVertex())
+				points.add(new Point(vertex.getCoordinates()));
+		}
+		return points;
+	}
+
 	@Override
 	public String toString()
 	{
