@@ -102,10 +102,9 @@ public class Main extends Application
 						sites.add(new SiteEvent(coordinates[0], coordinates[1]));
 
 						if (coordinates[0] < minX) minX = coordinates[0];
-						else if (coordinates[0] > maxX) maxX = coordinates[0];
-
+						if (coordinates[0] > maxX) maxX = coordinates[0];
 						if (coordinates[1] < minY) minY = coordinates[1];
-						else if (coordinates[1] > maxY) maxY = coordinates[1];
+						if (coordinates[1] > maxY) maxY = coordinates[1];
 
 						i = 0;
 					}
