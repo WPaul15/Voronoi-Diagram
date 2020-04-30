@@ -38,11 +38,6 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		this.status = new TreeMap<>();
 		this.breakpoints = new HashSet<>();
 
-		for (SiteEvent site : sites)
-		{
-			faces.add(site.getCell());
-		}
-
 		createVoronoiDiagram();
 	}
 
@@ -78,6 +73,8 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 	private void handleSiteEvent(SiteEvent event)
 	{
+		faces.add(event.getCell());
+
 		if (status.isEmpty())
 		{
 			status.put(new ArcSegment(event), null);
@@ -334,9 +331,17 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	// TODO Handle case where edge intersects a corner of the bounding box
 	private void connectInfiniteEdges()
 	{
-		/* If there are exactly four vertices, they are the corners of the bounding box and there are no Voronoi
-		   vertices */
+		/* If there are exactly four vertices, they are the corners of the bounding box and there are no Voronoi vertices. */
 		boolean noVertices = vertices.size() == 4;
+
+		/* If this is true, then there is only one face and thus, only one site point. */
+		if (noVertices && faces.size() == 2)
+		{
+			DCELFace face = faces.get(0).isUnbounded() ? faces.get(1) : faces.get(0);
+			getBoundingBox().getInnerEdge().setIncidentFace(face);
+			face.setOuterComponent(getBoundingBox().getInnerEdge());
+			return;
+		}
 
 		for (Breakpoint breakpoint : breakpoints)
 		{
@@ -438,7 +443,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 	{
 		for (DCELEdge edge : edges)
 		{
-			if (edge.getIncidentFace() != null && edge.getIncidentFace().getOuterComponent() != null)
+			if (edge.getIncidentFace() != null && !edge.getIncidentFace().isUnbounded())
 			{
 				DCELEdge e = edge.getNext();
 				DCELFace face = edge.getIncidentFace();

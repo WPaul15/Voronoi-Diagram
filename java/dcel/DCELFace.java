@@ -62,6 +62,11 @@ public class DCELFace
 		}
 	}
 
+	public boolean isUnbounded()
+	{
+		return type == FaceType.UNBOUNDED;
+	}
+
 	public DCELEdge getOuterComponent()
 	{
 		return outerComponent;

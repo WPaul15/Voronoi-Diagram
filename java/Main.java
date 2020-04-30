@@ -40,7 +40,6 @@ public class Main extends Application
 			throw new Exception("Please specify an input file and whether or not the resulting Voronoi diagram should be displayed");
 
 		Set<SiteEvent> sitePoints = readInputFile(parameters.get(0));
-		if (sitePoints.isEmpty()) Platform.exit();
 
 		boolean display = Boolean.parseBoolean(parameters.get(1));
 

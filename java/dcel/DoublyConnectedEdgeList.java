@@ -44,40 +44,35 @@ public class DoublyConnectedEdgeList
 		}
 		else
 		{
-			minX = -200;
-			maxX = 200;
-			minY = -200;
-			maxY = 200;
+			minX = -180;
+			maxX = 180;
+			minY = -180;
+			maxY = 180;
 		}
 
 		int boundingBoxPadding = 20;
-		DCELVertex b1 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
-		                               new Point(minX - boundingBoxPadding, minY - boundingBoxPadding)); //Lower left
-		DCELVertex b2 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
-		                               new Point(maxX + boundingBoxPadding, minY - boundingBoxPadding)); //Lower right
-		DCELVertex b3 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
-		                               new Point(maxX + boundingBoxPadding, maxY + boundingBoxPadding)); //Upper right
-		DCELVertex b4 = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
-		                               new Point(minX - boundingBoxPadding, maxY + boundingBoxPadding)); //Upper left
+		DCELVertex lowerLeft = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                                      new Point(minX - boundingBoxPadding, minY - boundingBoxPadding));
+		DCELVertex lowerRight = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                                       new Point(maxX + boundingBoxPadding, minY - boundingBoxPadding));
+		DCELVertex upperRight = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                                       new Point(maxX + boundingBoxPadding, maxY + boundingBoxPadding));
+		DCELVertex upperrLeft = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX,
+		                                       new Point(minX - boundingBoxPadding, maxY + boundingBoxPadding));
 
-		vertices.add(b1);
-		vertices.add(b2);
-		vertices.add(b3);
-		vertices.add(b4);
+		vertices.add(lowerLeft);
+		vertices.add(lowerRight);
+		vertices.add(upperRight);
+		vertices.add(upperrLeft);
 
-		DCELEdge bottomInner = new DCELEdge(b1);
-		DCELEdge bottomOuter = new DCELEdge(b2, bottomInner);
-		DCELEdge rightInner = new DCELEdge(b2);
-		DCELEdge rightOuter = new DCELEdge(b3, rightInner);
-		DCELEdge topInner = new DCELEdge(b3);
-		DCELEdge topOuter = new DCELEdge(b4, topInner);
-		DCELEdge leftInner = new DCELEdge(b4);
-		DCELEdge leftOuter = new DCELEdge(b1, leftInner);
-
-		b1.setIncidentEdge(leftOuter);
-		b2.setIncidentEdge(bottomOuter);
-		b3.setIncidentEdge(rightOuter);
-		b4.setIncidentEdge(topOuter);
+		DCELEdge bottomInner = new DCELEdge(lowerLeft);
+		DCELEdge bottomOuter = new DCELEdge(lowerRight, bottomInner);
+		DCELEdge rightInner = new DCELEdge(lowerRight);
+		DCELEdge rightOuter = new DCELEdge(upperRight, rightInner);
+		DCELEdge topInner = new DCELEdge(upperRight);
+		DCELEdge topOuter = new DCELEdge(upperrLeft, topInner);
+		DCELEdge leftInner = new DCELEdge(upperrLeft);
+		DCELEdge leftOuter = new DCELEdge(lowerLeft, leftInner);
 
 		edges.add(bottomInner);
 		edges.add(bottomOuter);
@@ -87,6 +82,11 @@ public class DoublyConnectedEdgeList
 		edges.add(topOuter);
 		edges.add(leftInner);
 		edges.add(leftOuter);
+
+		lowerLeft.setIncidentEdge(leftOuter);
+		lowerRight.setIncidentEdge(bottomOuter);
+		upperRight.setIncidentEdge(rightOuter);
+		upperrLeft.setIncidentEdge(topOuter);
 
 		// TODO Move to face calculation method
 		DCELFace uf = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null, bottomInner);
@@ -117,7 +117,7 @@ public class DoublyConnectedEdgeList
 		topOuter.setPrev(leftOuter);
 		leftOuter.setPrev(bottomOuter);
 
-		this.boundingBox = new BoundingBox(b1, b2, b3, b4);
+		this.boundingBox = new BoundingBox(lowerLeft, lowerRight, upperRight, upperrLeft);
 	}
 
 	protected void computeFaces()
@@ -161,17 +161,6 @@ public class DoublyConnectedEdgeList
 	public BoundingBox getBoundingBox()
 	{
 		return boundingBox;
-	}
-
-	public List<Point> getVerticesForDisplay()
-	{
-		List<Point> points = new ArrayList<>();
-		for (DCELVertex vertex : vertices)
-		{
-			if (vertex.isVoronoiVertex())
-				points.add(new Point(vertex.getCoordinates()));
-		}
-		return points;
 	}
 
 	@Override
@@ -336,6 +325,12 @@ public class DoublyConnectedEdgeList
 			}
 
 			return null;
+		}
+
+		public DCELEdge getInnerEdge()
+		{
+			/* This works on the assumption that the incident edges of each corner vertex are the edges facing the unbounded face. */
+			return lowerLeft.getIncidentEdge().getTwin();
 		}
 	}
 }
