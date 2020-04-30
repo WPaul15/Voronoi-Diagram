@@ -353,14 +353,17 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 			if (noVertices)
 			{
+				/* Once we've encountered one unbounded half-edge, we update both that edge and the twin simultaneously. */
 				if (edge.getOrigin() != null && edge.getTwin().getOrigin() != null) continue;
 
+				/* We use this "origin" to calculate the bounding box intersection points. */
 				origin = MathOps.midpoint(breakpoint.getLeftArcSegment(), breakpoint.getRightArcSegment());
 				getBoundingBox().connectEdge(this, origin, edge);
 				getBoundingBox().connectEdge(this, origin, edge.getTwin());
 			}
 			else
 			{
+				/* We want the half-edge directed out of the bounding box. */
 				if (edge.getOrigin() != null)
 					origin = edge.getOrigin().getCoordinates();
 				else

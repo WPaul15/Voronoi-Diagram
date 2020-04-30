@@ -227,6 +227,28 @@ public class DoublyConnectedEdgeList
 		{
 			Point intersection = getIntersection(origin, edge.getDirection());
 
+			/* Check to make sure the edge isn't intersecting a corner of the bounding box. */
+			if (intersection.equals(lowerLeft.getCoordinates()))
+			{
+				connectEdgeToCorner(lowerLeft, edge);
+				return;
+			}
+			else if (intersection.equals(lowerRight.getCoordinates()))
+			{
+				connectEdgeToCorner(lowerRight, edge);
+				return;
+			}
+			else if (intersection.equals(upperRight.getCoordinates()))
+			{
+				connectEdgeToCorner(upperRight, edge);
+				return;
+			}
+			else if (intersection.equals(upperLeft.getCoordinates()))
+			{
+				connectEdgeToCorner(upperLeft, edge);
+				return;
+			}
+
 			DCELVertex vertex = new DCELVertex(DCELVertex.VertexType.BOUNDING_VERTEX, intersection, edge.getTwin());
 			dcel.vertices.add(vertex);
 
@@ -254,6 +276,20 @@ public class DoublyConnectedEdgeList
 			newOuterBoundingEdge.getNext().setPrev(newOuterBoundingEdge);
 			newInnerBoundingEdge.setPrev(edge);
 			newInnerBoundingEdge.getNext().setPrev(newInnerBoundingEdge);
+			edge.getTwin().setPrev(innerBoundingEdge);
+		}
+
+		private void connectEdgeToCorner(DCELVertex corner, DCELEdge edge)
+		{
+			/* This works on the assumption that the incident edges of each corner vertex are the edges facing the unbounded face. */
+			DCELEdge innerBoundingEdge = corner.getIncidentEdge().getTwin();
+
+			edge.getTwin().setOrigin(corner);
+
+			edge.setNext(innerBoundingEdge.getNext());
+			innerBoundingEdge.getNext().setPrev(edge);
+
+			innerBoundingEdge.setNext(edge.getTwin());
 			edge.getTwin().setPrev(innerBoundingEdge);
 		}
 
