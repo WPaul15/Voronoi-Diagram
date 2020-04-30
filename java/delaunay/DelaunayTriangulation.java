@@ -21,18 +21,8 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 		createFromVoronoiDiagram(voronoiDiagram);
 	}
 
-	/* Try vertex method. Get list of faces around a vertex in ccw order. For each pair, if the incident edges of the
-	 * site points are not twins of each other, the site points aren't connected. If only one site point has an incident
-	 * edge, connect them. The faces correspond to the vertices and the incident face of the edge v1 -> v2 (current
-	 * vertex -> ccw neighbor) is the face for that vertex. The other is the unbounded face.
-	 * This is different if the incident edges are twins of each other; in this case, we only need to set the face of the
-	 * incident edge to the current vertex's face.*/
-
 	private void createFromVoronoiDiagram(VoronoiDiagram voronoiDiagram)
 	{
-		DCELFace unboundedFace = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null);
-		faces.add(unboundedFace);
-
 		for (DCELFace f : voronoiDiagram.getFaces())
 		{
 			if (f.getOuterComponent() != null) vertices.add(f.getSite());

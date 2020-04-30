@@ -14,6 +14,7 @@ public class DoublyConnectedEdgeList
 	protected final List<DCELVertex> vertices;
 	protected final List<DCELEdge> edges;
 	protected List<DCELFace> faces;
+	protected final DCELFace unboundedFace;
 	private BoundingBox boundingBox;
 
 	public DoublyConnectedEdgeList()
@@ -21,6 +22,8 @@ public class DoublyConnectedEdgeList
 		this.vertices = new ArrayList<>();
 		this.edges = new ArrayList<>();
 		this.faces = new ArrayList<>();
+		this.unboundedFace = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null);
+		faces.add(unboundedFace);
 	}
 
 	protected void computeBoundingBox()
@@ -88,14 +91,12 @@ public class DoublyConnectedEdgeList
 		upperRight.setIncidentEdge(rightOuter);
 		upperrLeft.setIncidentEdge(topOuter);
 
-		// TODO Move to face calculation method
-		DCELFace uf = new DCELFace(DCELFace.FaceType.UNBOUNDED, 0, null, bottomInner);
-		faces.add(uf);
+		bottomOuter.setIncidentFace(unboundedFace);
+		rightOuter.setIncidentFace(unboundedFace);
+		topOuter.setIncidentFace(unboundedFace);
+		leftOuter.setIncidentFace(unboundedFace);
 
-		bottomOuter.setIncidentFace(uf);
-		rightOuter.setIncidentFace(uf);
-		topOuter.setIncidentFace(uf);
-		leftOuter.setIncidentFace(uf);
+		unboundedFace.setInnerComponents(bottomOuter);
 
 		bottomInner.setNext(rightInner);
 		rightInner.setNext(topInner);
@@ -174,22 +175,22 @@ public class DoublyConnectedEdgeList
 			{
 				builder.append(v.toString()).append("\n");
 			}
-
-			builder.append("\n\n");
 		}
 
 		if (!faces.isEmpty())
 		{
+			builder.append("\n\n");
+
 			for (DCELFace f : faces)
 			{
 				builder.append(f.toString()).append("\n");
 			}
-
-			builder.append("\n\n");
 		}
 
 		if (!edges.isEmpty())
 		{
+			builder.append("\n\n");
+
 			for (DCELEdge e : edges)
 			{
 				builder.append(e.toString()).append("\n");

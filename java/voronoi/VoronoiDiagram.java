@@ -53,6 +53,9 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 	private void createVoronoiDiagram()
 	{
+		/* If this is true, there are no site points and thus, there is nothing to be done. */
+		if (queue.isEmpty()) return;
+
 		while (!queue.isEmpty())
 		{
 			Point event = queue.poll();
