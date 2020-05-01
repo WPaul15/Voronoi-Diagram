@@ -102,7 +102,7 @@ public class DCELEdge
 		return direction[0] > 0;
 	}
 
-	public boolean isDirectedUp()
+	public boolean isDirectedStraightUp()
 	{
 		if (direction[0] == 0)
 			return direction[1] > 0;

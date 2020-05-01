@@ -109,7 +109,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			{
 				breakpoint = new Breakpoint(alpha.getSite(), event, null);
 
-				if (!edge1.isDirectedUp())
+				if (!edge1.isDirectedStraightUp())
 				{
 					breakpoint.setTracedEdge(edge1);
 
@@ -137,7 +137,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 			{
 				breakpoint = new Breakpoint(event, alpha.getSite(), null);
 
-				if (!edge1.isDirectedUp())
+				if (!edge1.isDirectedStraightUp())
 				{
 					breakpoint.setTracedEdge(edge1);
 
@@ -175,7 +175,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 
 		if (newLeftBreakpoint.isMovingRight())
 		{
-			if (edge1.isDirectedRight() || edge1.isDirectedUp())
+			if (edge1.isDirectedRight() || edge1.isDirectedStraightUp())
 			{
 				newLeftBreakpoint.setTracedEdge(edge1);
 				newRightBreakpoint.setTracedEdge(edge2);
@@ -200,7 +200,7 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		}
 		else
 		{
-			if (edge1.isDirectedRight() || edge1.isDirectedUp())
+			if (edge1.isDirectedRight() || edge1.isDirectedStraightUp())
 			{
 				newLeftBreakpoint.setTracedEdge(edge2);
 				newRightBreakpoint.setTracedEdge(edge1);
@@ -247,17 +247,17 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		Map.Entry<ArcSegment, CircleEvent> leftEntry = status.lowerEntry(alpha);
 		Map.Entry<ArcSegment, CircleEvent> rightEntry = status.higherEntry(alpha);
 
-		ArcSegment leftNeighbor = leftEntry.getKey();
-		ArcSegment rightNeighbor = rightEntry.getKey();
+		ArcSegment leftArcSegment = leftEntry.getKey();
+		ArcSegment rightArcSegment = rightEntry.getKey();
 
-		Breakpoint oldLeftBreakpoint = leftNeighbor.getRightBreakpoint();
-		Breakpoint oldRightBreakpoint = rightNeighbor.getLeftBreakpoint();
+		Breakpoint oldLeftBreakpoint = leftArcSegment.getRightBreakpoint();
+		Breakpoint oldRightBreakpoint = rightArcSegment.getLeftBreakpoint();
 
-		if (!(oldLeftBreakpoint.getTracedEdge().getTwin().isDirectedUp() &&
+		if (!(oldLeftBreakpoint.getTracedEdge().getTwin().isDirectedStraightUp() &&
 				oldLeftBreakpoint.getTracedEdge().getOrigin() == null))
 			breakpoints.remove(oldLeftBreakpoint);
 
-		if (!(oldRightBreakpoint.getTracedEdge().getTwin().isDirectedUp() &&
+		if (!(oldRightBreakpoint.getTracedEdge().getTwin().isDirectedStraightUp() &&
 				oldRightBreakpoint.getTracedEdge().getOrigin() == null))
 			breakpoints.remove(oldRightBreakpoint);
 
@@ -266,23 +266,23 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		edges.add(edge1);
 		edges.add(edge2);
 
-		calculateDirections(edge1, edge2, leftNeighbor.getSite(), rightNeighbor.getSite());
+		calculateDirections(edge1, edge2, leftArcSegment.getSite(), rightArcSegment.getSite());
 
-		Breakpoint newBreakpoint = new Breakpoint(leftNeighbor.getSite(), rightNeighbor.getSite(), null);
+		Breakpoint newBreakpoint = new Breakpoint(leftArcSegment.getSite(), rightArcSegment.getSite(), null);
 
 		if (newBreakpoint.isMovingRight())
 		{
-			if (edge1.isDirectedRight() || edge1.isDirectedUp()) newBreakpoint.setTracedEdge(edge1);
+			if (edge1.isDirectedRight() || edge1.isDirectedStraightUp()) newBreakpoint.setTracedEdge(edge1);
 			else newBreakpoint.setTracedEdge(edge2);
 		}
 		else
 		{
-			if (edge1.isDirectedRight() || edge1.isDirectedUp()) newBreakpoint.setTracedEdge(edge2);
+			if (edge1.isDirectedRight() || edge1.isDirectedStraightUp()) newBreakpoint.setTracedEdge(edge2);
 			else newBreakpoint.setTracedEdge(edge1);
 		}
 
-		leftNeighbor.setRightBreakpoint(newBreakpoint);
-		rightNeighbor.setLeftBreakpoint(newBreakpoint);
+		leftArcSegment.setRightBreakpoint(newBreakpoint);
+		rightArcSegment.setLeftBreakpoint(newBreakpoint);
 
 		breakpoints.add(newBreakpoint);
 
@@ -304,8 +304,8 @@ public class VoronoiDiagram extends DoublyConnectedEdgeList
 		oldLeftBreakpoint.getTracedEdge().setNext(oldRightBreakpoint.getTracedEdge().getTwin());
 		newBreakpoint.getTracedEdge().getTwin().setNext(oldLeftBreakpoint.getTracedEdge().getTwin());
 
-		checkForCircleEvent(leftNeighbor);
-		checkForCircleEvent(rightNeighbor);
+		checkForCircleEvent(leftArcSegment);
+		checkForCircleEvent(rightArcSegment);
 	}
 
 	private void checkForCircleEvent(ArcSegment arcSegment)

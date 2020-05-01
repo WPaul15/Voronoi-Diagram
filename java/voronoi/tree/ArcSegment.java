@@ -75,7 +75,6 @@ public class ArcSegment implements Comparable<ArcSegment>
 		if (thisRight.getX() <= compareToLeft.getX())
 			return -1;
 
-		/* Handle the case when the first two site points have the same y-coordinate */
 		return MathOps.midpoint(thisLeft, thisRight).compareTo(MathOps.midpoint(compareToLeft, compareToRight));
 	}
 
