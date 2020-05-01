@@ -75,6 +75,11 @@ public class DCELVertex
 		return type == VertexType.BOUNDING_VERTEX;
 	}
 
+	/**
+	 * Returns a {@code List} of the {@code DCELFace}s incident on this vertex, listed in counterclockwise order.
+	 *
+	 * @return a {@code List} of the {@code DCELFace}s incident on this vertex, listed in counterclockwise order
+	 */
 	public List<DCELFace> getIncidentFaces()
 	{
 		ArrayList<DCELFace> incidentFaces = new ArrayList<>();
@@ -90,6 +95,11 @@ public class DCELVertex
 		return incidentFaces;
 	}
 
+	/**
+	 * Returns the last edge coming into this vertex before the incident edge, traversing the edges in clockwise order.
+	 *
+	 * @return the last {@code DCELEdge} coming into this vertex before the incident edge
+	 */
 	public DCELEdge getPreviousIncomingEdge()
 	{
 		DCELEdge edge = incidentEdge.getTwin();
@@ -103,6 +113,12 @@ public class DCELVertex
 		return edge;
 	}
 
+	/**
+	 * Returns the next edge leaving this vertex before the twin of the incident edge, traversing the edges in
+	 * counterclockwise order.
+	 *
+	 * @return the next {@code DCELEdge} leaving this vertex before the twin of the incident edge
+	 */
 	public DCELEdge getNextOutgoingEdge()
 	{
 		DCELEdge edge = incidentEdge;

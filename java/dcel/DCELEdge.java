@@ -21,9 +21,6 @@ public class DCELEdge
 	/* Store the vector representing the edge's direction for easier calculations later */
 	private double[] direction;
 
-	/**
-	 * Constructs a new DCEL edge.
-	 */
 	public DCELEdge(EdgeType type)
 	{
 		this.name = "";
@@ -48,12 +45,6 @@ public class DCELEdge
 		this.direction = new double[2];
 	}
 
-	/**
-	 * Constructs a new DCEL edge whose twin is the given DCEL edge and sets the twin reference of the given edge to
-	 * this edge.
-	 *
-	 * @param twin The twin edge of this edge
-	 */
 	public DCELEdge(EdgeType type, DCELEdge twin)
 	{
 		this.name = "";
@@ -115,20 +106,20 @@ public class DCELEdge
 		if (name.equals(""))
 		{
 			StringBuilder builder = new StringBuilder();
-			//builder.append('e');
+			builder.append('e');
 
 			if (origin != null)
 			{
-				if (isVoronoiEdge()) builder.append("ve");
-				else if (isDelaunayEdge()) builder.append("de");
-				else builder.append("be");
-				//if (origin.isBoundingVertex()) builder.append('b');
+//				if (isVoronoiEdge()) builder.append("ve");
+//				else if (isDelaunayEdge()) builder.append("de");
+//				else builder.append("be");
+				if (origin.isBoundingVertex()) builder.append('b');
 				builder.append(origin.getIndex());
 			}
 			if (twin != null && twin.origin != null)
 			{
 				builder.append(',');
-				//if (twin.origin.isBoundingVertex()) builder.append('b');
+				if (twin.origin.isBoundingVertex()) builder.append('b');
 				builder.append(twin.origin.getIndex());
 			}
 
@@ -205,14 +196,11 @@ public class DCELEdge
 
 		builder.append(getName());
 		if (origin != null) builder.append("  ").append(origin.getName());
-		if (twin != null) builder.append("  T:").append(twin.getName());
-		if (incidentFace != null) builder.append("  F:").append(incidentFace.getName());
-		if (next != null) builder.append("  N:").append(next.getName());
-		if (prev != null) builder.append("  P:").append(prev.getName());
+		if (twin != null) builder.append("  ").append(twin.getName());
+		if (incidentFace != null) builder.append("  ").append(incidentFace.getName());
+		if (next != null) builder.append("  ").append(next.getName());
+		if (prev != null) builder.append("  ").append(prev.getName());
 
 		return builder.toString();
-
-//		return name + "  " + origin.getName() + "  " + twin.getName() + "  " + incidentFace.getName() + "  " +
-//				next.getName() + "  " + prev.getName();
 	}
 }

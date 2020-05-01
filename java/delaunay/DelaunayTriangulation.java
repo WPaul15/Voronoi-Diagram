@@ -8,6 +8,9 @@ import voronoi.VoronoiDiagram;
 
 import java.util.List;
 
+/**
+ * @author Willem Paul
+ */
 public class DelaunayTriangulation extends DoublyConnectedEdgeList
 {
 	public DelaunayTriangulation()
@@ -15,6 +18,11 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 		super();
 	}
 
+	/**
+	 * Creates a Delaunay triangulation, stored as a {@code DoublyConnectedEdgeList}, from the given Voronoi diagram.
+	 *
+	 * @param voronoiDiagram the Voronoi diagram from which to create the Delaunay trianguation
+	 */
 	public DelaunayTriangulation(VoronoiDiagram voronoiDiagram)
 	{
 		super();
