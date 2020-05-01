@@ -113,7 +113,7 @@ e4,5  p4  e5,4  t3  e5,1  e1,4
 e5,4  p5  e4,5  uf  e4,2  e1,5
 ```
 ### Display
-The generated diagrams can also be displayed after generation (see below for instructions on how to do this). When displayed, the Voronoi diagram is shown in black and the Delaunay triangulation is shown in red.
+The generated diagrams can also be displayed after generation (see below for instructions on how to do this). When displayed, the Voronoi diagram is shown in black and the Delaunay triangulation is shown in red. Note that the site points of the Voronoi diagram form the vertices of the Delaunay triangulation and are therefore not explicitly displayed.
 #### Example
 This is the graphical output of the program using the example site points.
 ![Voronoi Diagram](voronoi.png)
