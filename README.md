@@ -2,8 +2,10 @@
 ## About
 This is a project for COM S 418: Computational Geometry. Given any number of points, it will generate the Voronoi diagram of the points using Steven Fortune's line sweep algorithm. It will also generate the Delaunay triangulation of the set of site points using the Voronoi diagram.
 
-### Note
-The code does not currently handle the case in which more than three site points are cocircular. This includes the case in which a site point appear directly below a breakpoint. There is an issue with properly inserting circle events and breakpoints, which causes the calculation of the Voronoi cells to enter an infinite loop. If the code doesn't finish executing within a reasonable amount of time, this is likely the cause.
+### Notes
+The code does not currently handle the case in which a site point appears directly below a breakpoint that is tracing a vertical edge. This is due to an issue with incorrectly removing and adding breakpoints in this case. The code may throw a `NullPointerException` in this case.
+
+Additionaly, there is an issue where, with some input sets, the code will get stuck in an infinite loop during the calculation of the Voronoi cells. This is also due to incorrectly removing breakpoints. If the code fails to complete in a reasonable amount of time, this is likely the cause.
 
 ## Input
 The input file must contain (x, y) coordinate pairs separated by either a space or a newline. These coordinates can be decimals. The input file may also contain blank lines and comments can be added using the '#' character.
