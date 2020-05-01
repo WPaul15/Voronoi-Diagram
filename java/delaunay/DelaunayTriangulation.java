@@ -28,10 +28,14 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 			if (f.getOuterComponent() != null) vertices.add(f.getSite());
 		}
 
+		boolean voronoiVertexExists = false;
+
 		for (DCELVertex v : voronoiDiagram.getVertices())
 		{
 			if (v.isVoronoiVertex())
 			{
+				voronoiVertexExists = true;
+
 				DCELFace delaunayFace = new DCELFace(DCELFace.FaceType.DELAUNAY_TRIANGLE, v.getIndex(), null);
 				faces.add(delaunayFace);
 				List<DCELFace> incidentFaces = v.getIncidentFaces();
@@ -109,8 +113,68 @@ public class DelaunayTriangulation extends DoublyConnectedEdgeList
 					}
 				}
 			}
+			/* If this is true, then we have the case in which all site points are collinear; there are no Voronoi
+			vertices. */
+			else if (v.isBoundingVertex() && !voronoiVertexExists && voronoiDiagram.getVertices().size() >= 4)
+			{
+				createLinearTriangulation(voronoiDiagram);
+				break;
+			}
 			/* Since the Voronoi vertices are listed first, we can skip the rest once we hit a bounding vertex. */
-			else if (v.isBoundingVertex()) break;
+			else break;
+		}
+	}
+
+	private void createLinearTriangulation(VoronoiDiagram voronoiDiagram)
+	{
+		DCELEdge prevEdge = null;
+
+		for (DCELEdge e : voronoiDiagram.getEdges())
+		{
+			if (e.isVoronoiEdge())
+			{
+				if (prevEdge == null) prevEdge = e;
+
+				/* Hack to avoid computing duplicates; Each pair of twin half-edges in the Voronoi diagram is listed together */
+				if (!prevEdge.equals(e.getTwin()))
+				{
+					DCELVertex v1 = e.getIncidentFace().getSite();
+					DCELVertex v2 = e.getTwin().getIncidentFace().getSite();
+
+					DCELEdge e1 = new DCELEdge(DCELEdge.EdgeType.DELAUNAY_EDGE);
+					DCELEdge e2 = new DCELEdge(DCELEdge.EdgeType.DELAUNAY_EDGE, e1);
+					edges.add(e1);
+					edges.add(e2);
+
+					e1.setOrigin(v1);
+					e2.setOrigin(v2);
+
+					e1.setIncidentFace(unboundedFace);
+					e2.setIncidentFace(unboundedFace);
+					unboundedFace.setInnerComponents(e1);
+
+					e1.setNext(e2);
+					e2.setPrev(e1);
+
+					if (v1.getIncidentEdge() != null)
+					{
+						e2.setNext(v1.getIncidentEdge());
+						v1.getIncidentEdge().setPrev(e2);
+						e1.setPrev(v1.getIncidentEdge().getTwin());
+						v1.getIncidentEdge().getTwin().setNext(e1);
+					}
+					else
+					{
+						e1.setPrev(e2);
+						e2.setNext(e1);
+					}
+
+					v1.setIncidentEdge(e1);
+					v2.setIncidentEdge(e2);
+				}
+
+				prevEdge = e;
+			}
 		}
 	}
 }
